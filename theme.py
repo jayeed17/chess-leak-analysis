@@ -169,27 +169,41 @@ def board_strip(st, figures):
     st.markdown(f'<div class="boards">{html}</div>', unsafe_allow_html=True)
 
 
-def severity_bar(st, series, x_label, y_label, order=None, higher_is_worse=True):
+def severity_bar(st, series, x_label, y_label, order=None, higher_is_worse=True, highlight=None):
     """Bar chart via Altair -- st.bar_chart can't colour individual bars.
 
-    Every bar is BAR_BASE except the single worst one, highlighted in
-    SEVERITY["blunder"]. One red bar reads as "this is the problem"; every
-    bar red carries no information at all.
+    Two colouring modes:
 
-    `higher_is_worse` picks which end is "worst": True for blunder rate /
-    wp_loss (a high number is bad), False for best-move rate / win rate
-    (a LOW number is bad). Get this backwards and the chart highlights your
-    best category as if it were the problem -- pick per chart, not by default.
+    - Default (`highlight=None`): this is a RATE ranking, and the chart
+      highlights whichever bar(s) are worst by `higher_is_worse` -- True
+      for blunder rate / wp_loss (a high number is bad), False for
+      best-move rate / win rate (a low number is bad). Get this backwards
+      and the chart highlights your best category as the problem. Uses
+      `value == max/min`, not idxmax/idxmin, so a genuine tie highlights
+      every tied bar instead of silently picking one.
+    - `highlight` given (an iterable of category labels, or a bool
+      Series/dict keyed by category): colours exactly those categories
+      red. For a COMPOSITION chart -- bars that sum to ~100%, e.g. motif
+      share -- there's no single "worst" bar, just categories that belong
+      to a different group, so the colour has to come from an explicit
+      classification, not from finding an extreme value.
 
-    `order` sorts the x-axis in that order (Altair handles this directly --
-    no CategoricalIndex workaround needed here, unlike st.bar_chart).
+    `order` sorts the x-axis in that order (Altair's `sort` encoding takes
+    the list directly -- no CategoricalIndex workaround needed here,
+    unlike st.bar_chart).
+
+    Axis label/title font is set explicitly to match the page -- Altair's
+    default theme is sans-serif and does not inherit page CSS.
     """
     import altair as alt
 
     data = series.rename("value").rename_axis(x_label).reset_index()
-    worst_i = data["value"].idxmax() if higher_is_worse else data["value"].idxmin()
-    data["is_worst"] = False
-    data.loc[worst_i, "is_worst"] = True
+    if highlight is not None:
+        as_map = highlight if isinstance(highlight, dict) else {k: True for k in highlight}
+        data["is_flagged"] = data[x_label].map(as_map).fillna(False)
+    else:
+        extreme = data["value"].max() if higher_is_worse else data["value"].min()
+        data["is_flagged"] = data["value"] == extreme
 
     x_enc = alt.X(f"{x_label}:N", title=None, sort=order if order else "-y")
     chart = (
@@ -198,11 +212,14 @@ def severity_bar(st, series, x_label, y_label, order=None, higher_is_worse=True)
         .encode(
             x=x_enc,
             y=alt.Y("value:Q", title=y_label),
-            color=alt.condition(alt.datum.is_worst,
+            color=alt.condition(alt.datum.is_flagged,
                                 alt.value(SEVERITY["blunder"]), alt.value(BAR_BASE)),
             tooltip=[alt.Tooltip(f"{x_label}:N", title=x_label),
                      alt.Tooltip("value:Q", title=y_label, format=".1f")],
         )
+        .configure_axis(labelFont="Times New Roman, Times, serif",
+                        titleFont="Times New Roman, Times, serif",
+                        labelFontSize=12, titleFontSize=13)
     )
     st.altair_chart(chart, use_container_width=True)
 

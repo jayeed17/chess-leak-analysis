@@ -78,6 +78,14 @@ def render_kpis(df):
     ])
 
 
+# Matches the tactical/hangs definition used everywhere else in this project
+# (report.py, model.py's motif comparison) -- deliberately excludes allows_mate,
+# same as the established 69.2%/26.7% finding. Including allows_mate would push
+# the combined share to ~71.6% and make this chart's caption disagree with every
+# other place that number gets quoted.
+HANGS_MOTIFS = {"hangs_pawn", "hangs_knight", "hangs_bishop", "hangs_rook", "hangs_queen"}
+TACTICAL_MOTIFS = HANGS_MOTIFS | {"allows_double_attack", "allows_fork_check", "loses_material"}
+
 TREND_METRICS = {
     "Blunder rate": "is_blunder",
     "Mean wp_loss": "wp_loss",
@@ -150,7 +158,10 @@ def clock_section(df):
                "blunder at nearly the same overall rate (12.7% vs 13.3%) and blunder "
                "rate is actually *higher* on moves I spent longer thinking on -- the "
                "wrong direction for a pure time-pressure story. Clock is a real but "
-               "minor factor, not the driver.")
+               "minor factor, not the driver. The red bar here is the highest *rate*, "
+               "not the biggest problem -- under 30s on the clock was also the "
+               "smallest of five simulated leaks (~3.7 Elo), because so few of my "
+               "moves actually happen there.")
 
 
 def move_no_section(df):
@@ -175,13 +186,25 @@ def motif_breakdown(df):
     bounds = [wilson(c, n) for c in g["count"]]
     g["ci_low"] = [round(b[0], 1) for b in bounds]
     g["ci_high"] = [round(b[1], 1) for b in bounds]
-    severity_bar(st, g["share_%"], "motif", "Share of blunders (%)")
+    # NOT a rate ranking -- these bars sum to ~100% of blunders, so there's no
+    # single "worst" one. Highlighting the max would just flag whichever
+    # category the tactical mass happens to be split across (that was the
+    # actual bug: "positional" looked worst only because tactical blunders are
+    # divided across four separate categories). Colour comes from an explicit
+    # tactical/positional classification instead.
+    severity_bar(st, g["share_%"], "motif", "Share of blunders (%)", highlight=TACTICAL_MOTIFS)
     st.dataframe(g, width="stretch")
     if n < MIN_N:
         st.caption(f"⚠️ Only {n} blunders (n) in this filter — motif shares are indicative only.")
-    st.caption("69.2% of blunders are tactical oversights and 26.7% are outright "
-               "hangs -- not subtle positional drift, mostly a piece left "
-               "undefended on the wrong square.")
+
+    # computed from raw counts, not the already-rounded share_% column, to
+    # avoid compounding rounding error across several summed categories
+    tactical_pct = 100 * g["count"].reindex(TACTICAL_MOTIFS).fillna(0).sum() / n
+    hangs_pct = 100 * g["count"].reindex(HANGS_MOTIFS).fillna(0).sum() / n
+    st.caption(f"Red = tactical oversights (hangs, forks, double attacks, lost material): "
+               f"{tactical_pct:.1f}% of blunders in this filter, {hangs_pct:.1f}% of them "
+               f"outright hangs. Not subtle positional drift, mostly a piece left undefended "
+               f"on the wrong square.")
 
 
 @st.cache_data

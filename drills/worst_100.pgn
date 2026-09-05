@@ -1,0 +1,1200 @@
+[Event "Drill 1 - allows_mate (endgame)"]
+[Site "https://www.chess.com/game/live/166482763706"]
+[Date "2026.03.26"]
+[Round "1"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/p4R1p/6pk/2p5/Q4p2/2q5/P1P3PP/7K b - - 0 26"]
+[SetUp "1"]
+
+26... Qe1# { Solution. You played f3 instead (wp_loss 100, motif: allows_mate). } ( 26... f3 ) *
+
+[Event "Drill 2 - allows_fork_check (endgame)"]
+[Site "https://www.chess.com/game/live/171092575954"]
+[Date "2026.07.04"]
+[Round "2"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "5r2/Q5pk/3Np3/8/4pq1p/6RP/PP4PK/8 w - - 0 36"]
+[SetUp "1"]
+
+36. Qxg7# { Solution. You played Qe7 instead (wp_loss 100, motif: allows_fork_check). } ( 36. Qe7 ) *
+
+[Event "Drill 3 - positional (endgame)"]
+[Site "https://www.chess.com/game/live/171205225060"]
+[Date "2026.07.06"]
+[Round "3"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "4Q3/5K1k/8/8/5P2/1p6/8/qq6 b - - 0 74"]
+[SetUp "1"]
+
+74... Qf5+ { Solution. You played b2 instead (wp_loss 100, motif: positional). } ( 74... b2 ) *
+
+[Event "Drill 4 - allows_mate (endgame)"]
+[Site "https://www.chess.com/game/live/168663621276"]
+[Date "2026.05.13"]
+[Round "4"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "Q7/8/2B2k2/2B2np1/5P2/1P1Pn1PK/1N5P/8 w - - 0 41"]
+[SetUp "1"]
+
+41. Qf8+ { Solution. You played Qe8 instead (wp_loss 100, motif: allows_mate). } ( 41. Qe8 ) *
+
+[Event "Drill 5 - hangs_rook (endgame)"]
+[Site "https://www.chess.com/game/live/172226725168"]
+[Date "2026.07.29"]
+[Round "5"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2r5/3R2Pk/7q/4pK2/4P3/5P2/3b4/8 b - - 5 50"]
+[SetUp "1"]
+
+50... Qg6+ { Solution. You played Rf8+ instead (wp_loss 100, motif: hangs_rook). } ( 50... Rf8+ ) *
+
+[Event "Drill 6 - allows_fork_check (endgame)"]
+[Site "https://www.chess.com/game/live/164624016918"]
+[Date "2026.02.13"]
+[Round "6"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/pp4b1/8/1pP1k1p1/P1B3Pq/5K2/8/2B5 w - - 0 36"]
+[SetUp "1"]
+
+36. Bb2# { Solution. You played Bxb5 instead (wp_loss 94, motif: allows_fork_check). } ( 36. Bxb5 ) *
+
+[Event "Drill 7 - positional (endgame)"]
+[Site "https://www.chess.com/game/live/173199650560"]
+[Date "2026.08.18"]
+[Round "7"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2k5/p1p3Np/2p5/Kp6/5r2/5N1P/PPP3P1/4R3 b - - 0 26"]
+[SetUp "1"]
+
+26... Ra4# { Solution. You played Kb7 instead (wp_loss 94, motif: positional). } ( 26... Kb7 ) *
+
+[Event "Drill 8 - allows_fork_check (endgame)"]
+[Site "https://www.chess.com/game/live/164624016918"]
+[Date "2026.02.13"]
+[Round "8"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/pp4b1/2p5/2P1k1p1/PPB3Pq/5K2/8/2B5 w - - 3 35"]
+[SetUp "1"]
+
+35. Bb2# { Solution. You played b5 instead (wp_loss 93, motif: allows_fork_check). } ( 35. b5 ) *
+
+[Event "Drill 9 - allows_fork_check (endgame)"]
+[Site "https://www.chess.com/game/live/166482763706"]
+[Date "2026.03.26"]
+[Round "9"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/p6p/6pk/2p5/Q7/2q2R2/P1P3PP/7K b - - 0 27"]
+[SetUp "1"]
+
+27... Qe1+ { Solution. You played Qe5 instead (wp_loss 92, motif: allows_fork_check). } ( 27... Qe5 ) *
+
+[Event "Drill 10 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/170166794606"]
+[Date "2026.06.14"]
+[Round "10"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "6k1/1bp3p1/2n1p1B1/1p1p2q1/1P1P2n1/r1P2Q2/4P2P/3R2K1 w - - 1 29"]
+[SetUp "1"]
+
+29. Qf7+ { Solution. You played Bc2 instead (wp_loss 91, motif: allows_fork_check). } ( 29. Bc2 ) *
+
+[Event "Drill 11 - hangs_pawn (endgame)"]
+[Site "https://www.chess.com/game/live/166482763706"]
+[Date "2026.03.26"]
+[Round "11"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/p2R1pkp/6p1/2p5/Q4p2/2q5/P1P3PP/7K b - - 1 25"]
+[SetUp "1"]
+
+25... Qe1# { Solution. You played Kh6 instead (wp_loss 91, motif: hangs_pawn). } ( 25... Kh6 ) *
+
+[Event "Drill 12 - loses_material (middlegame)"]
+[Site "https://www.chess.com/game/live/148248723590"]
+[Date "2026.01.20"]
+[Round "12"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r2qk3/4r3/pn1b4/1p2N1p1/1P3nB1/8/P1P2P2/2KR3R w q - 1 27"]
+[SetUp "1"]
+
+27. Rh8# { Solution. You played Bd7+ instead (wp_loss 91, motif: loses_material). } ( 27. Bd7+ ) *
+
+[Event "Drill 13 - positional (endgame)"]
+[Site "https://www.chess.com/game/live/173199650560"]
+[Date "2026.08.18"]
+[Round "13"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/pkp4p/2p1N3/Kp6/5r2/5N1P/PPP3P1/4R3 b - - 2 27"]
+[SetUp "1"]
+
+27... Ra4# { Solution. You played Rc4 instead (wp_loss 90, motif: positional). } ( 27... Rc4 ) *
+
+[Event "Drill 14 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/167650656784"]
+[Date "2026.04.22"]
+[Round "14"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r4rk1/pppR2b1/2n2pR1/4p2p/4n2B/1bP1PN1P/1P3P2/1q1QKB2 b - - 4 19"]
+[SetUp "1"]
+
+19... Qxd1+ { Solution. You played Qxb2 instead (wp_loss 90, motif: allows_fork_check). } ( 19... Qxb2 ) *
+
+[Event "Drill 15 - hangs_rook (middlegame)"]
+[Site "https://www.chess.com/game/live/173941635158"]
+[Date "2026.09.03"]
+[Round "15"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3rk2r/pp3ppp/2p1pn2/4B3/qPBQp3/P5P1/5P1P/3R2K1 w k - 1 19"]
+[SetUp "1"]
+
+19. Qxd8# { Solution. You played Qc5 instead (wp_loss 89, motif: hangs_rook). } ( 19. Qc5 ) *
+
+[Event "Drill 16 - allows_mate (endgame)"]
+[Site "https://www.chess.com/game/live/169427992798"]
+[Date "2026.05.29"]
+[Round "16"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "rq6/5pkp/2p3p1/p2pQ3/8/8/P3RPK1/8 b - - 9 31"]
+[SetUp "1"]
+
+31... Qxe5 { Solution. You played Kf8 instead (wp_loss 89, motif: allows_mate). } ( 31... Kf8 ) *
+
+[Event "Drill 17 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/166603743632"]
+[Date "2026.03.29"]
+[Round "17"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "5b2/1bpk1N1p/2p3p1/p2p4/3q2n1/2N4Q/PPP2PPP/4R1K1 w - - 8 23"]
+[SetUp "1"]
+
+23. Ne5+ { Solution. You played Qxh7 instead (wp_loss 89, motif: allows_fork_check). } ( 23. Qxh7 ) *
+
+[Event "Drill 18 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/167092357868"]
+[Date "2026.04.09"]
+[Round "18"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "1r1qr1k1/R4pb1/3p3p/5Np1/2QPP3/2P5/4RPPP/6K1 b - - 2 25"]
+[SetUp "1"]
+
+25... Rb1+ { Solution. You played Rc8 instead (wp_loss 88, motif: allows_fork_check). } ( 25... Rc8 ) *
+
+[Event "Drill 19 - allows_mate (middlegame)"]
+[Site "https://www.chess.com/game/live/170493878572"]
+[Date "2026.06.21"]
+[Round "19"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "1n3rk1/6pp/4pq2/4N3/1P1P4/1P4p1/P4PBP/2RQ1K2 w - - 0 26"]
+[SetUp "1"]
+
+26. Ng4 { Solution. You played hxg3 instead (wp_loss 87, motif: allows_mate). } ( 26. hxg3 ) *
+
+[Event "Drill 20 - allows_mate (middlegame)"]
+[Site "https://www.chess.com/game/live/166749791586"]
+[Date "2026.04.02"]
+[Round "20"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "1k1r3B/1q3b2/5p2/2p5/Np1P2Q1/6Pp/2P2P2/1R2R1K1 w - - 1 30"]
+[SetUp "1"]
+
+30. Qxh3 { Solution. You played dxc5 instead (wp_loss 87, motif: allows_mate). } ( 30. dxc5 ) *
+
+[Event "Drill 21 - positional (middlegame)"]
+[Site "https://www.chess.com/game/live/174019151416"]
+[Date "2026.09.05"]
+[Round "21"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2kn2r1/ppp1qp1p/3b4/8/P2Pb3/4P3/1B1NBPPP/R2Q1RK1 b - - 1 18"]
+[SetUp "1"]
+
+18... Rxg2+ { Solution. You played Qg5 instead (wp_loss 87, motif: positional). } ( 18... Qg5 ) *
+
+[Event "Drill 22 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/168110541134"]
+[Date "2026.05.01"]
+[Round "22"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2k1rbnr/pp6/5p2/2p3pp/2bp4/1P4B1/P1P2PPP/3RQ1K1 w - - 0 19"]
+[SetUp "1"]
+
+19. Qxe8# { Solution. You played bxc4 instead (wp_loss 87, motif: allows_fork_check). } ( 19. bxc4 ) *
+
+[Event "Drill 23 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/147650314108"]
+[Date "2026.01.06"]
+[Round "23"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r4rk1/pQ3p1p/4b1p1/2p1q3/8/2P5/PP4PP/RN2R1K1 b - - 4 19"]
+[SetUp "1"]
+
+19... Qxe1# { Solution. You played Rfe8 instead (wp_loss 87, motif: hangs_queen). } ( 19... Rfe8 ) *
+
+[Event "Drill 24 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/148329164354"]
+[Date "2026.01.22"]
+[Round "24"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "1q3k2/p4p1p/2p5/2Pr4/1P3Q2/7P/P1P2PP1/5RK1 w - - 1 25"]
+[SetUp "1"]
+
+25. Qxb8+ { Solution. You played a3 instead (wp_loss 86, motif: hangs_queen). } ( 25. a3 ) *
+
+[Event "Drill 25 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/148399230488"]
+[Date "2026.01.23"]
+[Round "25"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "5n2/pp2k3/2P1b3/6NQ/8/P7/P1P1KPqP/8 b - - 2 26"]
+[SetUp "1"]
+
+26... Bg4+ { Solution. You played Qe4+ instead (wp_loss 86, motif: hangs_queen). } ( 26... Qe4+ ) *
+
+[Event "Drill 26 - hangs_pawn (endgame)"]
+[Site "https://www.chess.com/game/live/147904653610"]
+[Date "2026.01.12"]
+[Round "26"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/1Qp3kp/2R5/4q3/2Pp4/1P1P4/8/1K1N1r2 b - - 0 41"]
+[SetUp "1"]
+
+41... Rxd1+ { Solution. You played Qe2 instead (wp_loss 85, motif: hangs_pawn). } ( 41... Qe2 ) *
+
+[Event "Drill 27 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/165225238382"]
+[Date "2026.02.26"]
+[Round "27"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "rn3rk1/p4ppp/1q2b3/1P1QP3/2p1nP2/2P3P1/P1BN3P/R1B1K2R w KQ - 1 18"]
+[SetUp "1"]
+
+18. Qxe4 { Solution. You played Qxa8 instead (wp_loss 84, motif: allows_fork_check). } ( 18. Qxa8 ) *
+
+[Event "Drill 28 - hangs_pawn (middlegame)"]
+[Site "https://www.chess.com/game/live/166526999526"]
+[Date "2026.03.27"]
+[Round "28"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r2q1rk1/1p3pp1/pn1b2P1/3p3p/3NnN1P/4P3/PP1P4/R1BQK1R1 b Q - 0 19"]
+[SetUp "1"]
+
+19... Qxh4+ { Solution. You played f6 instead (wp_loss 83, motif: hangs_pawn). } ( 19... f6 ) *
+
+[Event "Drill 29 - loses_material (middlegame)"]
+[Site "https://www.chess.com/game/live/148033354764"]
+[Date "2026.01.15"]
+[Round "29"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3rk2r/ppp1b2p/3qB3/8/3n4/8/PP2QPPP/R1B1K2R w KQ - 3 17"]
+[SetUp "1"]
+
+17. Qh5+ { Solution. You played Qe4 instead (wp_loss 83, motif: loses_material). } ( 17. Qe4 ) *
+
+[Event "Drill 30 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/173872738360"]
+[Date "2026.09.02"]
+[Round "30"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r3r1k1/pp3ppp/2pP4/7N/2P3n1/4q1P1/PB4BP/R2Qb2K w - - 5 23"]
+[SetUp "1"]
+
+23. Qxg4 { Solution. You played Bxg7 instead (wp_loss 83, motif: allows_fork_check). } ( 23. Bxg7 ) *
+
+[Event "Drill 31 - allows_mate (middlegame)"]
+[Site "https://www.chess.com/game/live/170214919438"]
+[Date "2026.06.15"]
+[Round "31"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3r2k1/1b2bp2/3N2pQ/p1q1P3/Pp2P3/1B6/1P4PP/3R1K2 b - - 2 28"]
+[SetUp "1"]
+
+28... Ba6+ { Solution. You played Qxe5 instead (wp_loss 82, motif: allows_mate). } ( 28... Qxe5 ) *
+
+[Event "Drill 32 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/164148583814"]
+[Date "2026.02.02"]
+[Round "32"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r3k2r/pp1n2pp/2p1B3/7b/1PPPpb2/1Q2nPq1/P2N1K1P/R1B4R w - - 0 17"]
+[SetUp "1"]
+
+17. hxg3 { Solution. You played Ke2 instead (wp_loss 82, motif: allows_fork_check). } ( 17. Ke2 ) *
+
+[Event "Drill 33 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/169671498928"]
+[Date "2026.06.03"]
+[Round "33"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2kr2r1/pp5p/3b4/2p2R2/4p1p1/2B1P3/PPPNQ1Bq/3R1K2 w - - 5 27"]
+[SetUp "1"]
+
+27. Nxe4 { Solution. You played Qxg4 instead (wp_loss 82, motif: hangs_queen). } ( 27. Qxg4 ) *
+
+[Event "Drill 34 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/148294264568"]
+[Date "2026.01.21"]
+[Round "34"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/2Q2pkp/5qp1/8/8/P4B1P/2r2PP1/3R2K1 w - - 0 29"]
+[SetUp "1"]
+
+29. Qxc2 { Solution. You played Rd8 instead (wp_loss 82, motif: hangs_queen). } ( 29. Rd8 ) *
+
+[Event "Drill 35 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/173294896910"]
+[Date "2026.08.20"]
+[Round "35"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r4rk1/p6p/b3pqp1/1p1pR3/2pP4/P1P5/1PQB1PPP/4R1K1 w - - 1 22"]
+[SetUp "1"]
+
+22. Bh6 { Solution. You played R1e3 instead (wp_loss 82, motif: allows_fork_check). } ( 22. R1e3 ) *
+
+[Event "Drill 36 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/166399781480"]
+[Date "2026.03.25"]
+[Round "36"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/p7/kp2Q2p/3R2p1/3q2P1/r3rpKP/5R2/8 w - - 1 38"]
+[SetUp "1"]
+
+38. Qc8# { Solution. You played Rxd4 instead (wp_loss 81, motif: hangs_queen). } ( 38. Rxd4 ) *
+
+[Event "Drill 37 - allows_mate (middlegame)"]
+[Site "https://www.chess.com/game/live/166647654516"]
+[Date "2026.03.30"]
+[Round "37"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r1br2k1/pp2qpp1/5n1B/4p3/2n5/2P2NQ1/PPP2PPP/R4RK1 b - - 0 16"]
+[SetUp "1"]
+
+16... Nh5 { Solution. You played Ne4 instead (wp_loss 81, motif: allows_mate). } ( 16... Ne4 ) *
+
+[Event "Drill 38 - positional (middlegame)"]
+[Site "https://www.chess.com/game/live/165743489946"]
+[Date "2026.03.09"]
+[Round "38"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "6k1/ppp1Rpbp/4b1p1/2N5/1P3B2/2n4P/P4PPK/3r4 w - - 2 23"]
+[SetUp "1"]
+
+23. Re8+ { Solution. You played Nxb7 instead (wp_loss 81, motif: positional). } ( 23. Nxb7 ) *
+
+[Event "Drill 39 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/164436258856"]
+[Date "2026.02.09"]
+[Round "39"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r5k1/ppp2pp1/3b3p/8/2B3b1/2NP2q1/PP1P4/R1B1RK2 b - - 8 23"]
+[SetUp "1"]
+
+23... Qf4+ { Solution. You played Qxd3+ instead (wp_loss 80, motif: hangs_queen). } ( 23... Qxd3+ ) *
+
+[Event "Drill 40 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/173872738360"]
+[Date "2026.09.02"]
+[Round "40"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r3r1k1/pp3ppp/2pP4/7N/2P3n1/4q1P1/PB4BP/R2Qb2K w - - 1 21"]
+[SetUp "1"]
+
+21. Qxg4 { Solution. You played Bc1 instead (wp_loss 80, motif: allows_fork_check). } ( 21. Bc1 ) *
+
+[Event "Drill 41 - hangs_rook (middlegame)"]
+[Site "https://www.chess.com/game/live/164624707056"]
+[Date "2026.02.13"]
+[Round "41"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "Q6r/3k2p1/4p2p/1p1rPp1P/1R1BbP2/2p5/1b4P1/5RK1 b - - 0 31"]
+[SetUp "1"]
+
+31... Rxa8 { Solution. You played Rg8 instead (wp_loss 80, motif: hangs_rook). } ( 31... Rg8 ) *
+
+[Event "Drill 42 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/173872738360"]
+[Date "2026.09.02"]
+[Round "42"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r3r1k1/pp2qppp/2p5/3P3N/2P3n1/6P1/PB4BP/R2Qb2K w - - 0 20"]
+[SetUp "1"]
+
+20. Qxg4 { Solution. You played d6 instead (wp_loss 80, motif: allows_fork_check). } ( 20. d6 ) *
+
+[Event "Drill 43 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/164148967838"]
+[Date "2026.02.02"]
+[Round "43"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "5rk1/5pbp/8/P2Q2p1/1P6/6P1/q4P2/1R4K1 w - - 5 34"]
+[SetUp "1"]
+
+34. Qxa2 { Solution. You played b5 instead (wp_loss 80, motif: hangs_queen). } ( 34. b5 ) *
+
+[Event "Drill 44 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/169366568320"]
+[Date "2026.05.28"]
+[Round "44"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "4R3/6k1/8/N5pp/Pp6/1KpB4/2P2q2/8 b - - 0 39"]
+[SetUp "1"]
+
+39... Qf7+ { Solution. You played Qe1 instead (wp_loss 79, motif: hangs_queen). } ( 39... Qe1 ) *
+
+[Event "Drill 45 - allows_mate (middlegame)"]
+[Site "https://www.chess.com/game/live/147766043870"]
+[Date "2026.01.08"]
+[Round "45"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "rn3rk1/p2p1ppp/bpp5/4p3/2B1P3/2NPnNqP/PPP2bP1/R1BQ1R1K w - - 4 13"]
+[SetUp "1"]
+
+13. Bxe3 { Solution. You played Qe2 instead (wp_loss 79, motif: allows_mate). } ( 13. Qe2 ) *
+
+[Event "Drill 46 - hangs_rook (middlegame)"]
+[Site "https://www.chess.com/game/live/169012943758"]
+[Date "2026.05.21"]
+[Round "46"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r5k1/p4ppp/1p2p3/5n2/1Pr1qB2/P3P1P1/4QP1P/2RR2K1 w - - 0 27"]
+[SetUp "1"]
+
+27. Rxc4 { Solution. You played Rd7 instead (wp_loss 79, motif: hangs_rook). } ( 27. Rd7 ) *
+
+[Event "Drill 47 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/167212600518"]
+[Date "2026.04.12"]
+[Round "47"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2rqr1k1/1b2npbp/p2p2p1/Pp1Pp1N1/1P2B1Q1/2N5/2P2PPP/1R3RK1 b - - 6 17"]
+[SetUp "1"]
+
+17... Rxc3 { Solution. You played f6 instead (wp_loss 78, motif: allows_fork_check). } ( 17... f6 ) *
+
+[Event "Drill 48 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/167185779464"]
+[Date "2026.04.11"]
+[Round "48"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3k4/3qn2r/2p1R1N1/1p2Qp1p/1p1P4/6P1/1PP2P1P/6K1 w - - 7 25"]
+[SetUp "1"]
+
+25. Nf8 { Solution. You played Qxf5 instead (wp_loss 78, motif: hangs_queen). } ( 25. Qxf5 ) *
+
+[Event "Drill 49 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/167775804700"]
+[Date "2026.04.24"]
+[Round "49"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "1k1r4/pb3Q2/1pp5/2bpPNr1/8/P7/2P1N1B1/R6K w - - 5 29"]
+[SetUp "1"]
+
+29. Qh7 { Solution. You played Ne7 instead (wp_loss 77, motif: allows_fork_check). } ( 29. Ne7 ) *
+
+[Event "Drill 50 - hangs_bishop (opening)"]
+[Site "https://www.chess.com/game/live/148163692422"]
+[Date "2026.01.18"]
+[Round "50"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r2q1rk1/pppn1pp1/3bb3/1B1n2N1/3PQp1p/2N5/PPP2PPP/3R1RK1 b - - 1 12"]
+[SetUp "1"]
+
+12... Qxg5 { Solution. You played f5 instead (wp_loss 77, motif: hangs_bishop). } ( 12... f5 ) *
+
+[Event "Drill 51 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/167015072388"]
+[Date "2026.04.08"]
+[Round "51"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3rr1k1/p4p1p/1p3Q2/3n4/8/2P3P1/PP1R3P/6K1 w - - 0 25"]
+[SetUp "1"]
+
+25. Qg5+ { Solution. You played c4 instead (wp_loss 77, motif: hangs_queen). } ( 25. c4 ) *
+
+[Event "Drill 52 - hangs_rook (endgame)"]
+[Site "https://www.chess.com/game/live/165788168494"]
+[Date "2026.03.11"]
+[Round "52"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/1R3p1p/P5p1/1n2p1P1/2k1P3/7P/5P2/5K2 w - - 1 42"]
+[SetUp "1"]
+
+42. Rxf7 { Solution. You played Rc7+ instead (wp_loss 77, motif: hangs_rook). } ( 42. Rc7+ ) *
+
+[Event "Drill 53 - hangs_pawn (endgame)"]
+[Site "https://www.chess.com/game/live/164013935314"]
+[Date "2026.01.30"]
+[Round "53"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "5r2/8/7R/8/p5P1/5k1P/P1r2PN1/6K1 w - - 6 51"]
+[SetUp "1"]
+
+51. Ne1+ { Solution. You played Kh2 instead (wp_loss 76, motif: hangs_pawn). } ( 51. Kh2 ) *
+
+[Event "Drill 54 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/166929874232"]
+[Date "2026.04.06"]
+[Round "54"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/Q7/1p1r1r2/p2pk3/P2R2P1/7P/2P2P2/5K2 w - - 1 35"]
+[SetUp "1"]
+
+35. Rd3 { Solution. You played Qxb6 instead (wp_loss 76, motif: hangs_queen). } ( 35. Qxb6 ) *
+
+[Event "Drill 55 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/148293139206"]
+[Date "2026.01.21"]
+[Round "55"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "4rk2/3Q3p/p5p1/Bpp2p2/3P3P/8/P4PPK/3r4 w - - 2 31"]
+[SetUp "1"]
+
+31. d5 { Solution. You played dxc5 instead (wp_loss 76, motif: hangs_queen). } ( 31. dxc5 ) *
+
+[Event "Drill 56 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/169200275966"]
+[Date "2026.05.25"]
+[Round "56"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2Q5/6bk/6pp/5p2/P3p3/6PP/r4PK1/2q2N2 b - - 10 42"]
+[SetUp "1"]
+
+42... Qxc8 { Solution. You played Rxa4 instead (wp_loss 76, motif: hangs_queen). } ( 42... Rxa4 ) *
+
+[Event "Drill 57 - positional (middlegame)"]
+[Site "https://www.chess.com/game/live/168023060608"]
+[Date "2026.04.30"]
+[Round "57"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r7/5pkp/b2Qp1p1/4nq2/R3NP2/4P1P1/6BP/6K1 w - - 1 33"]
+[SetUp "1"]
+
+33. Qxe5+ { Solution. You played Ng5 instead (wp_loss 75, motif: positional). } ( 33. Ng5 ) *
+
+[Event "Drill 58 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/167135935228"]
+[Date "2026.04.10"]
+[Round "58"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "1rq5/p5k1/b3p1p1/2pp2R1/5Q2/1P6/P1P2PBP/R5K1 w - - 2 30"]
+[SetUp "1"]
+
+30. Qe5+ { Solution. You played Qf6+ instead (wp_loss 75, motif: hangs_queen). } ( 30. Qf6+ ) *
+
+[Event "Drill 59 - allows_mate (middlegame)"]
+[Site "https://www.chess.com/game/live/148148188980"]
+[Date "2026.01.17"]
+[Round "59"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r1bq1rk1/ppp2p1p/5p2/3pb2Q/8/1P1BP3/P4PPP/RN2K2R b KQ - 3 14"]
+[SetUp "1"]
+
+14... f5 { Solution. You played Bxa1 instead (wp_loss 75, motif: allows_mate). } ( 14... Bxa1 ) *
+
+[Event "Drill 60 - loses_material (middlegame)"]
+[Site "https://www.chess.com/game/live/166920379832"]
+[Date "2026.04.05"]
+[Round "60"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3r1b1r/1Qpk3p/p3q1p1/4P2P/8/3p2Bb/PP2PPB1/2R3K1 w - - 0 26"]
+[SetUp "1"]
+
+26. Rxc7+ { Solution. You played Qb3 instead (wp_loss 75, motif: loses_material). } ( 26. Qb3 ) *
+
+[Event "Drill 61 - positional (middlegame)"]
+[Site "https://www.chess.com/game/live/172014245860"]
+[Date "2026.07.24"]
+[Round "61"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r3k2r/pbp2ppp/4p3/5q2/1PNB1b2/P3p3/4B1PP/R2Q1R1K w kq - 0 20"]
+[SetUp "1"]
+
+20. Qa4+ { Solution. You played Bxg7 instead (wp_loss 75, motif: positional). } ( 20. Bxg7 ) *
+
+[Event "Drill 62 - allows_double_attack (middlegame)"]
+[Site "https://www.chess.com/game/live/167457616268"]
+[Date "2026.04.17"]
+[Round "62"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r2r2k1/p4ppp/4p3/2q5/4P3/5PnP/1P1Q2BK/2BR4 w - - 7 25"]
+[SetUp "1"]
+
+25. Qxd8+ { Solution. You played Qe1 instead (wp_loss 75, motif: allows_double_attack). } ( 25. Qe1 ) *
+
+[Event "Drill 63 - hangs_bishop (opening)"]
+[Site "https://www.chess.com/game/live/167005350538"]
+[Date "2026.04.07"]
+[Round "63"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "rnbqk2r/ppp2ppp/3b4/3p2B1/3P2n1/2P1PB2/PP3PPP/RN1QK2R w KQkq - 1 9"]
+[SetUp "1"]
+
+9. Bxd8 { Solution. You played Qe2 instead (wp_loss 75, motif: hangs_bishop). } ( 9. Qe2 ) *
+
+[Event "Drill 64 - hangs_queen (opening)"]
+[Site "https://www.chess.com/game/live/167238826484"]
+[Date "2026.04.13"]
+[Round "64"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r2qk2r/ppp2ppp/4pn2/3p1P2/1b1n4/2N2N2/PP2PPBP/1RBQ1RK1 w kq - 0 10"]
+[SetUp "1"]
+
+10. Qxd4 { Solution. You played Qc2 instead (wp_loss 75, motif: hangs_queen). } ( 10. Qc2 ) *
+
+[Event "Drill 65 - allows_double_attack (middlegame)"]
+[Site "https://www.chess.com/game/live/167170282904"]
+[Date "2026.04.11"]
+[Round "65"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "Q1b2rk1/2pqnpb1/p2p2pP/2p1p3/4P3/2NP1N2/PPP2P1P/R1B2RK1 b - - 0 15"]
+[SetUp "1"]
+
+15... Qg4+ { Solution. You played Nc6 instead (wp_loss 74, motif: allows_double_attack). } ( 15... Nc6 ) *
+
+[Event "Drill 66 - hangs_bishop (middlegame)"]
+[Site "https://www.chess.com/game/live/148163692422"]
+[Date "2026.01.18"]
+[Round "66"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r2q1rk1/pppn2p1/3bb3/1B1n1pN1/3P1p1p/2N2Q2/PPP2PPP/3R1RK1 b - - 1 13"]
+[SetUp "1"]
+
+13... Qxg5 { Solution. You played Bb4 instead (wp_loss 74, motif: hangs_bishop). } ( 13... Bb4 ) *
+
+[Event "Drill 67 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/168964691978"]
+[Date "2026.05.20"]
+[Round "67"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2k5/pp6/2p4p/3P4/8/1P2q3/nB1N4/3K3R b - - 1 36"]
+[SetUp "1"]
+
+36... Nb4 { Solution. You played Qf3+ instead (wp_loss 73, motif: hangs_queen). } ( 36... Qf3+ ) *
+
+[Event "Drill 68 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/148033354764"]
+[Date "2026.01.15"]
+[Round "68"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3r1r2/1Q2bk1p/5q2/p1p5/8/4B3/PP3PPP/R4RK1 w - - 0 24"]
+[SetUp "1"]
+
+24. Bxc5 { Solution. You played Qa6 instead (wp_loss 73, motif: hangs_queen). } ( 24. Qa6 ) *
+
+[Event "Drill 69 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/173872738360"]
+[Date "2026.09.02"]
+[Round "69"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r3r1k1/ppp1qppp/8/3P4/2P2Nn1/6P1/PB4BP/R2Qb2K w - - 0 19"]
+[SetUp "1"]
+
+19. Qxg4 { Solution. You played Nh5 instead (wp_loss 73, motif: allows_fork_check). } ( 19. Nh5 ) *
+
+[Event "Drill 70 - hangs_queen (opening)"]
+[Site "https://www.chess.com/game/live/148541288292"]
+[Date "2026.01.27"]
+[Round "70"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r1b1k2r/ppp2ppp/2n5/2bPp1q1/3P4/2N5/PPP2PPP/R1BQK2R b KQkq - 0 8"]
+[SetUp "1"]
+
+8... Qxg2 { Solution. You played Nxd4 instead (wp_loss 73, motif: hangs_queen). } ( 8... Nxd4 ) *
+
+[Event "Drill 71 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/164901069856"]
+[Date "2026.02.19"]
+[Round "71"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2r1r1k1/p2b3p/1p6/3PB3/3Pp2q/1Q2P3/P2RK3/8 b - - 1 34"]
+[SetUp "1"]
+
+34... Bg4+ { Solution. You played Qh2+ instead (wp_loss 73, motif: hangs_queen). } ( 34... Qh2+ ) *
+
+[Event "Drill 72 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/166646582340"]
+[Date "2026.03.30"]
+[Round "72"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/4n2k/7p/2qp2p1/p3p1P1/P1P1P3/1K3N2/5B2 b - - 1 44"]
+[SetUp "1"]
+
+44... Qb6+ { Solution. You played Qb5+ instead (wp_loss 73, motif: hangs_queen). } ( 44... Qb5+ ) *
+
+[Event "Drill 73 - hangs_rook (endgame)"]
+[Site "https://www.chess.com/game/live/148243010556"]
+[Date "2026.01.20"]
+[Round "73"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "6k1/p5pp/8/1R6/2nPn1P1/5K2/PPP1r2P/8 b - - 2 30"]
+[SetUp "1"]
+
+30... Re3+ { Solution. You played Ncd2+ instead (wp_loss 73, motif: hangs_rook). } ( 30... Ncd2+ ) *
+
+[Event "Drill 74 - allows_double_attack (middlegame)"]
+[Site "https://www.chess.com/game/live/164901703366"]
+[Date "2026.02.19"]
+[Round "74"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r4rk1/2q2p1p/p2bpBN1/n2p4/Bp1Pb1P1/4P2Q/PPP2P1P/R4RK1 b - - 0 18"]
+[SetUp "1"]
+
+18... fxg6 { Solution. You played Bxg6 instead (wp_loss 73, motif: allows_double_attack). } ( 18... Bxg6 ) *
+
+[Event "Drill 75 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/148329009514"]
+[Date "2026.01.22"]
+[Round "75"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r3r2k/ppp2Q1p/2n3p1/3p4/3P4/8/PPP1q3/2K1R1R1 b - - 1 19"]
+[SetUp "1"]
+
+19... Qxe1+ { Solution. You played Ne5 instead (wp_loss 72, motif: allows_fork_check). } ( 19... Ne5 ) *
+
+[Event "Drill 76 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/147891775140"]
+[Date "2026.01.11"]
+[Round "76"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "5bk1/pB3p2/6p1/7p/2bP4/2P1Q2P/q2r2P1/1R2R1K1 w - - 4 31"]
+[SetUp "1"]
+
+31. Be4 { Solution. You played d5 instead (wp_loss 71, motif: allows_fork_check). } ( 31. d5 ) *
+
+[Event "Drill 77 - hangs_queen (opening)"]
+[Site "https://www.chess.com/game/live/173478886106"]
+[Date "2026.08.24"]
+[Round "77"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r1b2rk1/pppp1pbp/2n3p1/3Bp1q1/3PP3/8/PPP2PPP/R1BQ1RK1 b - - 0 9"]
+[SetUp "1"]
+
+9... Qe7 { Solution. You played Nxd4 instead (wp_loss 70, motif: hangs_queen). } ( 9... Nxd4 ) *
+
+[Event "Drill 78 - allows_fork_check (middlegame)"]
+[Site "https://www.chess.com/game/live/166415384662"]
+[Date "2026.03.25"]
+[Round "78"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "5k1r/p1q4p/1rbp2p1/Q1b1pp2/1P6/2P5/P1P2PPP/R1B1K2R b KQ - 2 17"]
+[SetUp "1"]
+
+17... Bxb4 { Solution. You played Rb5 instead (wp_loss 70, motif: allows_fork_check). } ( 17... Rb5 ) *
+
+[Event "Drill 79 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/171091387456"]
+[Date "2026.07.03"]
+[Round "79"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3r1r1k/p1b1q2p/2p3p1/5B2/1P6/2P2N2/P3QPPP/R1B2RK1 b - - 0 21"]
+[SetUp "1"]
+
+21... Qxe2 { Solution. You played Rxf5 instead (wp_loss 70, motif: hangs_queen). } ( 21... Rxf5 ) *
+
+[Event "Drill 80 - allows_mate (middlegame)"]
+[Site "https://www.chess.com/game/live/172014245860"]
+[Date "2026.07.24"]
+[Round "80"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r3k2r/pbp2pBp/4p3/8/1PN1q3/P3p3/4B1Pb/R2Q2RK w kq - 0 22"]
+[SetUp "1"]
+
+22. Qd4 { Solution. You played Kxh2 instead (wp_loss 70, motif: allows_mate). } ( 22. Kxh2 ) *
+
+[Event "Drill 81 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/168809275648"]
+[Date "2026.05.16"]
+[Round "81"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "6k1/3b3p/p1r1p1p1/1p3P2/6P1/qBP1R3/P1P4P/4R1K1 b - - 0 27"]
+[SetUp "1"]
+
+27... Qc5 { Solution. You played Qxa2 instead (wp_loss 69, motif: hangs_queen). } ( 27... Qxa2 ) *
+
+[Event "Drill 82 - allows_double_attack (middlegame)"]
+[Site "https://www.chess.com/game/live/168243452522"]
+[Date "2026.05.04"]
+[Round "82"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "rnb1r1k1/pp4pp/3b1p2/3q4/2NP4/1PP1B1Q1/P4PPP/R3K2R b KQ - 0 16"]
+[SetUp "1"]
+
+16... Bxg3 { Solution. You played Bf5 instead (wp_loss 69, motif: allows_double_attack). } ( 16... Bf5 ) *
+
+[Event "Drill 83 - hangs_bishop (middlegame)"]
+[Site "https://www.chess.com/game/live/167238826484"]
+[Date "2026.04.13"]
+[Round "83"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r5k1/pp1q4/1b2N2p/n1p1Nr2/3p1P2/P2RP3/1P4BP/1RB3K1 w - - 1 25"]
+[SetUp "1"]
+
+25. Nxd7 { Solution. You played Bd5 instead (wp_loss 69, motif: hangs_bishop). } ( 25. Bd5 ) *
+
+[Event "Drill 84 - hangs_rook (opening)"]
+[Site "https://www.chess.com/game/live/166483796410"]
+[Date "2026.03.26"]
+[Round "84"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r1bqk1nr/1pp2ppp/2n5/1p1pp3/1P6/5NP1/1PPPPPBP/R1BQK2R b KQkq - 0 7"]
+[SetUp "1"]
+
+7... Rxa1 { Solution. You played e4 instead (wp_loss 69, motif: hangs_rook). } ( 7... e4 ) *
+
+[Event "Drill 85 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/148520948566"]
+[Date "2026.01.26"]
+[Round "85"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "8/3R2Qp/p1r2r2/4pk1q/4p3/1P2P1P1/P1P2P1P/6K1 b - - 0 38"]
+[SetUp "1"]
+
+38... Rxc2 { Solution. You played Qd1+ instead (wp_loss 69, motif: hangs_queen). } ( 38... Qd1+ ) *
+
+[Event "Drill 86 - hangs_pawn (endgame)"]
+[Site "https://www.chess.com/game/live/167046671896"]
+[Date "2026.04.08"]
+[Round "86"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2r3k1/6p1/p1p2p1p/1pRp3N/1P1P2bB/4P1P1/P4K2/8 b - - 4 33"]
+[SetUp "1"]
+
+33... Bxh5 { Solution. You played g5 instead (wp_loss 69, motif: hangs_pawn). } ( 33... g5 ) *
+
+[Event "Drill 87 - hangs_queen (endgame)"]
+[Site "https://www.chess.com/game/live/147827182554"]
+[Date "2026.01.10"]
+[Round "87"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r2q2k1/ppp2ppp/8/3B4/3b4/5Q1N/P1P5/5K2 b - - 3 28"]
+[SetUp "1"]
+
+28... Qf6 { Solution. You played Qxd5 instead (wp_loss 68, motif: hangs_queen). } ( 28... Qxd5 ) *
+
+[Event "Drill 88 - loses_material (middlegame)"]
+[Site "https://www.chess.com/game/live/164355434862"]
+[Date "2026.02.07"]
+[Round "88"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3r3r/4Qp1p/p1kB1n2/3p2pq/8/5PP1/PP3K1P/R7 w - - 5 27"]
+[SetUp "1"]
+
+27. Qc7+ { Solution. You played Qxf6 instead (wp_loss 68, motif: loses_material). } ( 27. Qxf6 ) *
+
+[Event "Drill 89 - hangs_pawn (middlegame)"]
+[Site "https://www.chess.com/game/live/148188046424"]
+[Date "2026.01.18"]
+[Round "89"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "4kb1r/p1p2p1p/4q3/6B1/1n1P4/3Q1P2/PPP1NP1P/R3K2R w KQk - 3 17"]
+[SetUp "1"]
+
+17. Qb5+ { Solution. You played Qa3 instead (wp_loss 68, motif: hangs_pawn). } ( 17. Qa3 ) *
+
+[Event "Drill 90 - loses_material (middlegame)"]
+[Site "https://www.chess.com/game/live/148318101208"]
+[Date "2026.01.21"]
+[Round "90"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "2rqk2r/6p1/2P1p2p/1P2p3/4Q3/2nPB2P/2P2PP1/2KR3R w k - 3 23"]
+[SetUp "1"]
+
+23. Qg6+ { Solution. You played Rde1 instead (wp_loss 68, motif: loses_material). } ( 23. Rde1 ) *
+
+[Event "Drill 91 - allows_double_attack (middlegame)"]
+[Site "https://www.chess.com/game/live/147766043870"]
+[Date "2026.01.08"]
+[Round "91"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r6k/p2nB1pp/b1p2r2/1p5B/4Pb1q/3P3P/PPP1N1P1/R3Q2K w - - 8 24"]
+[SetUp "1"]
+
+24. Qxh4 { Solution. You played Qf1 instead (wp_loss 68, motif: allows_double_attack). } ( 24. Qf1 ) *
+
+[Event "Drill 92 - hangs_queen (opening)"]
+[Site "https://www.chess.com/game/live/169978023560"]
+[Date "2026.06.10"]
+[Round "92"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r1b1kb1r/pppp1p1p/2n2np1/4p1q1/2B1P3/3P4/PPP2PPP/RNBQ1RK1 b kq - 0 6"]
+[SetUp "1"]
+
+6... Qh5 { Solution. You played Bg7 instead (wp_loss 68, motif: hangs_queen). } ( 6... Bg7 ) *
+
+[Event "Drill 93 - loses_material (middlegame)"]
+[Site "https://www.chess.com/game/live/170166794606"]
+[Date "2026.06.14"]
+[Round "93"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "3q1rk1/1bp3p1/2n1p1B1/1p1p4/1P1P2n1/r1P1QR2/4P2P/3R2K1 w - - 1 27"]
+[SetUp "1"]
+
+27. Qxe6+ { Solution. You played Qd3 instead (wp_loss 67, motif: loses_material). } ( 27. Qd3 ) *
+
+[Event "Drill 94 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/147561252616"]
+[Date "2026.01.03"]
+[Round "94"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r7/4r1k1/3pBb2/p1n3p1/Pp1p4/6P1/1PP1QP1P/5RK1 w - - 6 30"]
+[SetUp "1"]
+
+30. Qf3 { Solution. You played Bd5 instead (wp_loss 67, motif: hangs_queen). } ( 30. Bd5 ) *
+
+[Event "Drill 95 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/166383072326"]
+[Date "2026.03.24"]
+[Round "95"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r1b1kb1r/ppp4p/6p1/1N1P1p2/3qp3/8/PPP1Q1PP/R3KB1R b KQkq - 1 15"]
+[SetUp "1"]
+
+15... Qxb2 { Solution. You played Bd6 instead (wp_loss 67, motif: hangs_queen). } ( 15... Bd6 ) *
+
+[Event "Drill 96 - hangs_queen (middlegame)"]
+[Site "https://www.chess.com/game/live/166049095292"]
+[Date "2026.03.16"]
+[Round "96"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r4b2/4n3/p1npk3/1p1p1p2/3PpP2/P1N1P2Q/1PP1B2P/2K3R1 w - - 1 25"]
+[SetUp "1"]
+
+25. Nxd5 { Solution. You played Qh6+ instead (wp_loss 67, motif: hangs_queen). } ( 25. Qh6+ ) *
+
+[Event "Drill 97 - positional (middlegame)"]
+[Site "https://www.chess.com/game/live/173424059124"]
+[Date "2026.08.23"]
+[Round "97"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "1r4rk/6p1/5BPp/2npQ3/7P/4PK2/3q1P2/5R2 b - - 2 37"]
+[SetUp "1"]
+
+37... Rbf8 { Solution. You played Nd3 instead (wp_loss 66, motif: positional). } ( 37... Nd3 ) *
+
+[Event "Drill 98 - hangs_rook (middlegame)"]
+[Site "https://www.chess.com/game/live/163954250772"]
+[Date "2026.01.29"]
+[Round "98"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "6k1/2p2ppp/8/3P1b2/2PBr3/3Q2Pq/PrP2P1P/R4RK1 b - - 4 23"]
+[SetUp "1"]
+
+23... Rh4 { Solution. You played Re1 instead (wp_loss 66, motif: hangs_rook). } ( 23... Re1 ) *
+
+[Event "Drill 99 - allows_double_attack (middlegame)"]
+[Site "https://www.chess.com/game/live/148032896862"]
+[Date "2026.01.15"]
+[Round "99"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "r2qr1k1/5ppp/p1N2n2/1p1p1P2/1P1P1bn1/2NB4/P1P2PPP/2RQR1K1 b - - 0 17"]
+[SetUp "1"]
+
+17... Qc7 { Solution. You played Nd7 instead (wp_loss 66, motif: allows_double_attack). } ( 17... Nd7 ) *
+
+[Event "Drill 100 - hangs_rook (middlegame)"]
+[Site "https://www.chess.com/game/live/164577407468"]
+[Date "2026.02.12"]
+[Round "100"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[FEN "5r1k/1p3bp1/3r3p/Q1p5/P1P1P1P1/1P5P/1qP1N1K1/2R5 b - - 3 28"]
+[SetUp "1"]
+
+28... Qe5 { Solution. You played Rd2 instead (wp_loss 66, motif: hangs_rook). } ( 28... Rd2 ) *
+

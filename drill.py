@@ -7,10 +7,14 @@ move attached as a side variation for comparison.
 Selection is weighted toward middlegame and hangs_* blunders -- the two
 findings that survived every correction in this project (worst phase, most
 common concrete mistake). It's not a pure top-100-by-wp_loss list because a
-pure list would mostly reflect what got tagged mate/allows_mate in already-
-decided games, which isn't what's worth drilling.
+pure list would mostly reflect rare, dramatic endgame maximal errors
+(throwing a won endgame with mate-in-1 blunders) -- real, but not what
+recurs, so not what's worth optimizing drilling time against.
 
-Usage: python drill.py [--n 100] [--path data/moves.parquet] [--out data/drills/worst_100.pgn]
+Usage: python drill.py [--n 100] [--path data/moves.parquet] [--out drills/worst_100.pgn]
+
+Output goes to drills/ (NOT data/) -- data/ is gitignored, and this is the
+one artifact worth committing so it's actually browsable in the repo.
 """
 import argparse, glob, io, json, os
 
@@ -18,6 +22,14 @@ import chess, chess.pgn
 import pandas as pd
 
 RAW_GLOB = "data/raw/*/*.json"
+
+# Retune here. Endgame maximal errors (throwing a won endgame) are real but
+# rare and dramatic; drilling should optimize for what recurs, not for the
+# most extreme wp_loss values, which concentrate in the endgame precisely
+# because there's less material left to make a swing less than decisive.
+MIDDLEGAME_FRAC = 0.6
+HANGS_FRAC = 0.3
+# whatever's left (0.1 by default) fills from overall wp_loss severity
 
 
 def game_pgn_index():
@@ -44,7 +56,7 @@ def board_before_move(game_url, ply, pgn_index):
     return board if board.ply() == ply else None
 
 
-def pick_worst(df, n, middlegame_frac=0.4, hangs_frac=0.3):
+def pick_worst(df, n, middlegame_frac=MIDDLEGAME_FRAC, hangs_frac=HANGS_FRAC):
     """Top wp_loss moves, with dedicated quotas for middlegame and hangs_* blunders.
 
     A single "middlegame OR hangs_*" pool lets whichever is easier to fill
@@ -94,7 +106,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=100)
     ap.add_argument("--path", default="data/moves.parquet")
-    ap.add_argument("--out", default="data/drills/worst_100.pgn")
+    ap.add_argument("--out", default="drills/worst_100.pgn")
     a = ap.parse_args()
 
     df = pd.read_parquet(a.path)

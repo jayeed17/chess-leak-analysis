@@ -18,6 +18,7 @@ import argparse, io, math, os, datetime as dt
 
 import chess, chess.pgn, chess.engine
 import pandas as pd
+from scipy.stats import fisher_exact
 
 import chesscom
 
@@ -28,6 +29,38 @@ VALS = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3,
 
 def win_pct(cp_val):
     return 50 + 50 * (2 / (1 + math.exp(-0.00368208 * cp_val)) - 1)
+
+
+def wilson_ci(successes, n, z=1.959963985):
+    """95% Wilson score interval for a binomial proportion."""
+    if n == 0:
+        return (float("nan"), float("nan"))
+    phat = successes / n
+    denom = 1 + z**2 / n
+    center = phat + z**2 / (2 * n)
+    margin = z * math.sqrt(phat * (1 - phat) / n + z**2 / (4 * n**2))
+    return ((center - margin) / denom, (center + margin) / denom)
+
+
+def hit_rate_table(df, group_col):
+    """Sound-sac rate per group, over the ELIGIBLE denominator only.
+
+    sac_while_winning positions (best_cp>500 in classify()) were routed out
+    before they could ever be labeled sound or brilliant -- counting them in
+    the denominator pads groups unevenly (endgames land in sac_while_winning
+    far more often than openings do) and biases the rate low for whichever
+    group that happens to more often. sound / (sound + unsound) is the
+    honest rate. Wilson CIs come along so small-n groups don't get read as
+    real differences.
+    """
+    elig = df[df.label.isin(["brilliant", "sound_sac", "unsound_sac"])].copy()
+    elig["sound"] = elig.label.isin(["brilliant", "sound_sac"])
+    g = elig.groupby(group_col).sound.agg(sound="sum", n="size")
+    g["hit_pct"] = (g["sound"] / g["n"] * 100).round(1)
+    ci = [wilson_ci(s, n) for s, n in zip(g["sound"], g["n"])]
+    g["ci_lo_pct"] = [round(lo * 100, 1) for lo, _ in ci]
+    g["ci_hi_pct"] = [round(hi * 100, 1) for _, hi in ci]
+    return g
 
 
 def offers_material(board, move):
@@ -164,25 +197,47 @@ def main():
           f"out of {len(df)} attempts — {100*len(good)/max(len(df),1):.1f}% hit rate")
 
     if len(good):
-        print("\nWHICH PIECE YOU SACRIFICE")
+        print("\nsac_while_winning SHARE BY PHASE")
+        print("(these were never eligible for sound/brilliant -- if this share")
+        print(" is uneven across a breakdown below, that breakdown's raw hit")
+        print(" rate would be biased; hit_rate_table() below excludes them)")
+        winning_share = (df.assign(winning=df.label == "sac_while_winning")
+                            .groupby("phase").winning.agg(attempts="size", winning_pct=lambda s: round(100*s.mean(),1)))
+        print(winning_share.to_string())
+
+        print("\nWHICH PIECE YOU SACRIFICE (raw counts)")
         print(df.pivot_table(index="piece", columns="label", values="san",
                              aggfunc="size", fill_value=0).to_string())
+        print("\nsound-sac hit rate by piece (eligible denominator, with 95% Wilson CI)")
+        print(hit_rate_table(df, "piece").to_string())
 
-        print("\nBY TIME CONTROL — sound-sac hit rate")
-        hit = df.assign(sound=df.label.isin(["brilliant", "sound_sac"]))
-        print((hit.groupby("time_class").sound.agg(
-            attempts="size", sound_pct=lambda s: round(100 * s.mean(), 1))).to_string())
+        print("\nBY TIME CONTROL — sound-sac hit rate (eligible denominator, 95% Wilson CI)")
+        print(hit_rate_table(df, "time_class").to_string())
 
-        print("\nBY PHASE")
-        print((hit.groupby("phase").sound.agg(
-            attempts="size", sound_pct=lambda s: round(100 * s.mean(), 1))).to_string())
+        print("\nBY PHASE — sound-sac hit rate (eligible denominator, 95% Wilson CI)")
+        phase_rates = hit_rate_table(df, "phase")
+        print(phase_rates.to_string())
+        if {"opening", "endgame"} <= set(phase_rates.index):
+            op, en = phase_rates.loc["opening"], phase_rates.loc["endgame"]
+            table = [[op["sound"], op["n"] - op["sound"]], [en["sound"], en["n"] - en["sound"]]]
+            _, p = fisher_exact(table)
+            print(f"  opening vs endgame, Fisher's exact p={p:.4f}")
+        print("  read overlapping CIs as 'no detectable difference', not as a tie worth explaining.")
 
-        print("\nDID YOU CONVERT IT?")
-        conv = good.groupby("label").won.agg(games="size",
-                                             win_pct=lambda s: round(100 * s.mean(), 1))
+        print("\nDID YOU CONVERT IT? (small n -- Wilson CI included on purpose)")
+        conv = good.groupby("label").won.agg(games="size", win_pct=lambda s: round(100 * s.mean(), 1))
+        conv_ci = [wilson_ci(w, n) for w, n in zip(good.groupby("label").won.sum(), good.groupby("label").won.size())]
+        conv["ci_lo_pct"] = [round(lo * 100, 1) for lo, _ in conv_ci]
+        conv["ci_hi_pct"] = [round(hi * 100, 1) for _, hi in conv_ci]
         print(conv.to_string())
-        print(f"\n  overall win rate in these games: {100*good.won.mean():.1f}%")
-        print(f"  your baseline win rate: see report.py (~52-58%)")
+        overall_ci = wilson_ci(good.won.sum(), len(good))
+        print(f"\n  overall win rate in these games: {100*good.won.mean():.1f}% "
+              f"(95% CI {overall_ci[0]*100:.1f}-{overall_ci[1]*100:.1f}%)")
+        print("  your baseline win rate: see report.py")
+        print("  NOTE: brilliant/sound_sac only exist where best_cp<=500 (classify()")
+        print("  routes clearly-winning positions to sac_while_winning instead), so this")
+        print("  group is drawn from tighter games than your overall baseline by")
+        print("  construction -- a lower number here isn't evidence the sac hurt you.")
 
         print("\nYOUR BRILLIANCIES")
         b = df[df.label == "brilliant"].nlargest(15, "margin")

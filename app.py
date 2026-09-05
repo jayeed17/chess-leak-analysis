@@ -1,18 +1,24 @@
-"""Streamlit dashboard over data/moves.parquet.
+"""Streamlit dashboard over data/moves.parquet and data/brilliancies.parquet.
 
 Usage: streamlit run app.py
 
 Note: "blunder" here means wp_loss >= 20 (win-probability loss), not the
 parquet's cpl-based `blunder` column. See report.py/model.py's comparison of
 the two -- cpl alone overstates severity in already-decided positions
-(a 900cp -> 400cp swing is still totally winning). cpl/ACPL is still shown
-for reference.
+(a 900cp -> 400cp swing is still totally winning).
+
+Every rate shown carries an n and a 95% Wilson CI (dashboard_ext.rate_ci /
+rate_table) -- a filtered slice can drop to a handful of blunders, and a bare
+percentage on 8 events is exactly how the piece and time-control findings
+this project later retracted got made in the first place.
 """
 import glob, io, json
 
 import chess, chess.pgn, chess.svg
 import pandas as pd
 import streamlit as st
+
+from dashboard_ext import wilson, rate_ci, rate_table, overlapping, render_brilliancy_tab, board_at, MIN_N
 
 DATA_PATH = "data/moves.parquet"
 RAW_GLOB = "data/raw/*/*.json"
@@ -48,34 +54,77 @@ def sidebar_filters(df):
 def kpi_row(df):
     current = df.sort_values("end_time").my_rating.dropna()
     cols = st.columns(4)
-    cols[0].metric("ACPL", f"{df.cpl.mean():.0f}" if len(df) else "-")
+    cols[0].metric("Mean wp_loss", f"{df.wp_loss.mean():.1f}" if len(df) else "-",
+                    help="Win-probability points lost per move, on average. Replaces ACPL "
+                         "(cpl-based) -- cpl inflates in already-decided positions.")
     cols[1].metric(f"Blunder rate (wp_loss≥{BLUNDER_WP})",
-                    f"{df.is_blunder.mean()*100:.1f}%" if len(df) else "-")
-    cols[2].metric("Best-move rate", f"{df.played_best.mean()*100:.1f}%" if len(df) else "-")
+                    rate_ci(int(df.is_blunder.sum()), len(df)) if len(df) else "-")
+    cols[2].metric("Best-move rate", rate_ci(int(df.played_best.sum()), len(df)) if len(df) else "-")
     cols[3].metric("Rating (in filter)", f"{current.iloc[-1]:.0f}" if len(current) else "-")
 
 
-def blunder_vs_clock_chart(df):
-    st.subheader("Blunder rate vs. clock remaining")
+def render_rate_section(df, group_col, title, order=None):
+    """Bar chart + Wilson-CI table for blunder rate across a bucketed column.
+
+    Every group carries n and a 95% CI (rate_table), with the same overlap/
+    thin warnings the brilliancy tab uses -- a chart bar alone can't show
+    that, so the table underneath it is not optional decoration.
+    """
+    st.subheader(title)
+    if not len(df):
+        st.caption("no moves in this filter")
+        return
+    g = rate_table(df, group_col, "is_blunder")
+    if order:
+        order = [o for o in order if o in g.index]
+        g = g.reindex(order)
+        # st.bar_chart re-sorts a plain string index alphabetically regardless of
+        # row order -- an ordered CategoricalIndex is what actually gets respected
+        g.index = pd.CategoricalIndex(g.index, categories=order, ordered=True)
+    st.bar_chart(g["rate_%"])
+    st.dataframe(g, width="stretch")
+    if overlapping(g):
+        st.caption("⚠️ All intervals overlap — no group separates from any other. "
+                   "Do not read a pattern here.")
+    elif g.thin.any():
+        st.caption(f"⚠️ Some groups have n < {MIN_N}; treat those rates as indicative only.")
+
+
+def phase_section(df):
+    render_rate_section(df, "phase", "Blunder rate by phase",
+                         order=["opening", "middlegame", "endgame"])
+
+
+def clock_section(df):
     d = df.dropna(subset=["clock_left"]).copy()
     d["clock_bucket"] = pd.cut(d.clock_left, [0, 10, 30, 60, 120, 300, 1e9],
                                 labels=["<10s", "10-30s", "30-60s", "1-2m", "2-5m", "5m+"])
-    g = d.groupby("clock_bucket", observed=True).is_blunder.mean().mul(100)
-    st.bar_chart(g)
+    render_rate_section(d, "clock_bucket", "Blunder rate vs. clock remaining")
 
 
-def blunder_by_move_chart(df):
-    st.subheader("Blunder rate by move number")
+def move_no_section(df):
     d = df.copy()
     d["move_bucket"] = (d.move_no // 5 * 5).clip(upper=60)
-    g = d.groupby("move_bucket").is_blunder.mean().mul(100)
-    st.bar_chart(g)
+    render_rate_section(d, "move_bucket", "Blunder rate by move number")
 
 
 def motif_breakdown(df):
     st.subheader("What you actually hang (blunder motifs)")
-    m = df[df.is_blunder].motif.value_counts(normalize=True).mul(100).round(1)
-    st.bar_chart(m)
+    blunders = df[df.is_blunder]
+    n = len(blunders)
+    if n == 0:
+        st.caption("no blunders in this filter")
+        return
+    counts = blunders.motif.value_counts()
+    g = pd.DataFrame({"count": counts, "n": n})
+    g["share_%"] = (100 * g["count"] / n).round(1)
+    bounds = [wilson(c, n) for c in g["count"]]
+    g["ci_low"] = [round(b[0], 1) for b in bounds]
+    g["ci_high"] = [round(b[1], 1) for b in bounds]
+    st.bar_chart(g["share_%"])
+    st.dataframe(g, width="stretch")
+    if n < MIN_N:
+        st.caption(f"⚠️ Only {n} blunders (n) in this filter — motif shares are indicative only.")
 
 
 @st.cache_data
@@ -103,7 +152,14 @@ def board_before_move(game_url, ply):
     return board if board.ply() == ply else None
 
 
-def render_move(row):
+def render_board_svg(board, arrows, flipped, caption):
+    svg = chess.svg.board(board, arrows=arrows, size=400, flipped=flipped)
+    st.components.v1.html(str(svg), height=420)
+    st.caption(caption)
+
+
+def render_worst_move(row):
+    """Blunders tab board: your move (red) vs. engine best (green)."""
     board = board_before_move(row.game_url, row.ply)
     if board is None:
         st.warning("couldn't find/reconstruct this position from the cached PGN")
@@ -117,10 +173,30 @@ def render_move(row):
     if row.best_san and row.best_san != row.san:
         best = board.parse_san(row.best_san)
         arrows.append(chess.svg.Arrow(best.from_square, best.to_square, color="#00aa00"))
-    svg = chess.svg.board(board, arrows=arrows, size=400, flipped=(row.color == "black"))
-    st.components.v1.html(str(svg), height=420)
-    st.caption(f"red = your move ({row.san}) · green = engine best ({row.best_san}) · "
-               f"cpl {row.cpl:.0f} · wp_loss {row.wp_loss:.1f} · {row.motif}")
+    render_board_svg(board, arrows, flipped=(row.color == "black"),
+                      caption=f"red = your move ({row.san}) · green = engine best ({row.best_san}) · "
+                              f"cpl {row.cpl:.0f} · wp_loss {row.wp_loss:.1f} · {row.motif}")
+    st.markdown(f"[open game on chess.com]({row.game_url})")
+
+
+def render_brilliancy_move(row):
+    """Sacrifices tab board: the sacrifice itself (no separate 'best move' here --
+    the played move IS the thing being evaluated). Reuses game_pgn_index() for the
+    PGN text and dashboard_ext.board_at() for the ply-from-move_no+color derivation,
+    rather than a second copy of either."""
+    pgn = game_pgn_index().get(row.game_url)
+    if pgn is None:
+        st.warning("couldn't find the cached PGN for this game")
+        return
+    board = board_at(pgn, row.move_no, row.color)
+    try:
+        move = board.parse_san(row.san)
+    except ValueError:
+        st.warning(f"couldn't replay move {row.san!r} on the reconstructed board")
+        return
+    arrows = [chess.svg.Arrow(move.from_square, move.to_square, color="#1a7a1a")]
+    render_board_svg(board, arrows, flipped=(row.color == "black"),
+                      caption=f"{row.san} · {row.piece} sacrifice · margin {row.margin}cp · {row.label}")
     st.markdown(f"[open game on chess.com]({row.game_url})")
 
 
@@ -135,24 +211,39 @@ def worst_moves_table(df):
                .reset_index(drop=True))
     event = st.dataframe(worst, on_select="rerun", selection_mode="single-row", width="stretch")
     if event.selection.rows:
-        render_move(worst.iloc[event.selection.rows[0]])
+        render_worst_move(worst.iloc[event.selection.rows[0]])
 
 
-def main():
-    st.title("Chess leak analysis — jayeed101")
+def blunders_tab():
     df_all = load_data()
     df = sidebar_filters(df_all)
     st.caption(f"{len(df):,} moves / {df.game_url.nunique():,} games in view "
                f"(of {len(df_all):,} moves / {df_all.game_url.nunique():,} total)")
 
     kpi_row(df)
+    phase_section(df)
     left, right = st.columns(2)
     with left:
-        blunder_vs_clock_chart(df)
+        clock_section(df)
     with right:
-        blunder_by_move_chart(df)
+        move_no_section(df)
     motif_breakdown(df)
     worst_moves_table(df)
+
+
+def sacrifices_tab():
+    sel = render_brilliancy_tab(st)
+    if sel is not None:
+        render_brilliancy_move(sel)
+
+
+def main():
+    st.title("Chess leak analysis — jayeed101")
+    tab_blunders, tab_sac = st.tabs(["Blunders", "Sacrifices"])
+    with tab_blunders:
+        blunders_tab()
+    with tab_sac:
+        sacrifices_tab()
 
 
 if __name__ == "__main__":

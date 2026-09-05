@@ -3,7 +3,7 @@
 Usage:  python build_dataset.py <username> [--depth 12] [--since 2025/01] [--workers 4]
 Output: data/moves.parquet
 """
-import argparse, io, re, os, datetime as dt
+import argparse, glob, io, re, os, datetime as dt
 from concurrent.futures import ProcessPoolExecutor
 
 import chess, chess.pgn, chess.engine
@@ -180,15 +180,26 @@ def main():
         games = [g for g in games if g.get("time_class") in keep]
     print(f"analysing {len(games)} games at depth {a.depth} on {a.workers} workers...")
 
-    rows = []
+    # checkpoint every 5000 rows so a crash/interruption doesn't lose the whole run
+    os.makedirs("data/parts", exist_ok=True)
+    for old in glob.glob("data/parts/*.parquet"):
+        os.remove(old)  # stale parts from a prior run would get concatenated back in below
+
+    rows, part = [], 0
     with ProcessPoolExecutor(a.workers) as ex:
         for i, r in enumerate(ex.map(analyse_game, [(g, user, a.depth) for g in games], chunksize=4)):
             rows.extend(r)
             if (i + 1) % 25 == 0:
                 print(f"  {i+1}/{len(games)} games, {len(rows)} moves", flush=True)
+            if len(rows) >= 5000:
+                pd.DataFrame(rows).to_parquet(f"data/parts/{part:04d}.parquet", index=False)
+                rows, part = [], part + 1
+                print(f"  checkpoint {part} @ game {i+1}", flush=True)
+    if rows:
+        pd.DataFrame(rows).to_parquet(f"data/parts/{part:04d}.parquet", index=False)
 
-    df = pd.DataFrame(rows)
-    os.makedirs("data", exist_ok=True)
+    df = pd.concat([pd.read_parquet(p) for p in sorted(glob.glob("data/parts/*.parquet"))],
+                   ignore_index=True)
     df.to_parquet("data/moves.parquet", index=False)
     print(f"wrote data/moves.parquet: {len(df)} moves, {df.game_url.nunique()} games")
 

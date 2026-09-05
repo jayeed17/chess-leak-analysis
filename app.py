@@ -14,17 +14,18 @@ this project later retracted got made in the first place.
 """
 import glob, io, json
 
-import chess, chess.pgn, chess.svg
+import chess, chess.pgn
 import pandas as pd
 import streamlit as st
 
 from dashboard_ext import wilson, rate_table, overlapping, render_brilliancy_tab, board_at, MIN_N
-from theme import inject_theme, kpi_row, split_rate, QUALITY
+from theme import inject_theme, page_header, kpi_row, split_rate, SEVERITY, board_svg, board_strip, trend_chart
 
 DATA_PATH = "data/moves.parquet"
 RAW_GLOB = "data/raw/*/*.json"
 BLUNDER_WP = 20  # wp_loss threshold used throughout this dashboard
-BAR_COLOR = "#769656"  # theme.DARK -- board dark-square color, all st.bar_chart bars
+BAR_COLOR = SEVERITY["blunder"]  # every st.bar_chart bar -- these are all blunder-rate charts
+LINKEDIN_URL = "https://www.linkedin.com/in/zayeed-bin-kabir/"
 
 st.set_page_config(page_title="chess leak analysis", layout="wide")
 inject_theme(st)
@@ -60,21 +61,47 @@ def render_kpis(df):
     st.metric's display size wraps and clips; kpi_row splits value from
     interval so only the headline number is large."""
     if not len(df):
-        kpi_row(st, [{"label": "Mean wp_loss", "value": "-", "quality": "neutral"}])
+        kpi_row(st, [{"label": "Mean wp_loss", "value": "-", "severity": "neutral"}])
         return
     current = df.sort_values("end_time").my_rating.dropna()
     thin = len(df) < MIN_N
     blunder_value, blunder_sub = split_rate(int(df.is_blunder.sum()), len(df))
     best_value, best_sub = split_rate(int(df.played_best.sum()), len(df))
     kpi_row(st, [
-        {"label": "Mean wp_loss", "value": f"{df.wp_loss.mean():.1f}", "quality": "inaccuracy"},
+        {"label": "Mean wp_loss", "value": f"{df.wp_loss.mean():.1f}", "severity": "inaccuracy"},
         {"label": f"Blunder rate (wp_loss≥{BLUNDER_WP})", "value": blunder_value, "sub": blunder_sub,
-         "quality": "mistake", "thin": thin},
+         "severity": "blunder", "thin": thin},
         {"label": "Best-move rate", "value": best_value, "sub": best_sub,
-         "quality": "good", "thin": thin},
+         "severity": "good", "thin": thin},
         {"label": "Rating (in filter)",
-         "value": f"{current.iloc[-1]:.0f}" if len(current) else "-", "quality": "brilliant"},
+         "value": f"{current.iloc[-1]:.0f}" if len(current) else "-", "severity": "neutral"},
     ])
+
+
+TREND_METRICS = {
+    "Blunder rate": ("is_blunder", SEVERITY["blunder"]),
+    "Mean wp_loss": ("wp_loss", SEVERITY["inaccuracy"]),
+    "Best-move rate": ("played_best", SEVERITY["good"]),
+    "Rating": ("my_rating", SEVERITY["neutral"]),
+}
+
+
+def trend_section(df):
+    st.subheader("Trend")
+    choice = st.selectbox("Metric", list(TREND_METRICS.keys()))
+    value_col, color = TREND_METRICS[choice]
+    if not len(df):
+        st.caption("no moves in this filter")
+        return
+    trend_chart(st, df, choice, value_col, color=color)
+    if choice == "Rating":
+        st.caption("~1,024 games over 8 months, and rating runs flat to negative "
+                   "across that span -- more volume hasn't moved it on its own.")
+    else:
+        st.caption("Weekly mean over whatever the sidebar filters currently select. "
+                   "The rating trend above these charts is the one line confirmed "
+                   "flat to negative; this view is here to eyeball the others, not "
+                   "a claim about their shape.")
 
 
 def render_rate_section(df, group_col, title, order=None):
@@ -107,6 +134,10 @@ def render_rate_section(df, group_col, title, order=None):
 def phase_section(df):
     render_rate_section(df, "phase", "Blunder rate by phase",
                          order=["opening", "middlegame", "endgame"])
+    st.caption("Middlegame is the worst phase (9.4%) against 5.3% in the opening and "
+               "5.8% in the endgame. An earlier cut using raw centipawn loss showed "
+               "the endgame as worst instead -- that turned out to be a measurement "
+               "artifact, not a real pattern.")
 
 
 def clock_section(df):
@@ -114,12 +145,20 @@ def clock_section(df):
     d["clock_bucket"] = pd.cut(d.clock_left, [0, 10, 30, 60, 120, 300, 1e9],
                                 labels=["<10s", "10-30s", "30-60s", "1-2m", "2-5m", "5m+"])
     render_rate_section(d, "clock_bucket", "Blunder rate vs. clock remaining")
+    st.caption("Blunder rate does rise as the clock runs down, but blitz and rapid "
+               "blunder at nearly the same overall rate (12.7% vs 13.3%) and blunder "
+               "rate is actually *higher* on moves I spent longer thinking on -- the "
+               "wrong direction for a pure time-pressure story. Clock is a real but "
+               "minor factor, not the driver.")
 
 
 def move_no_section(df):
     d = df.copy()
     d["move_bucket"] = (d.move_no // 5 * 5).clip(upper=60)
     render_rate_section(d, "move_bucket", "Blunder rate by move number")
+    st.caption("Rate climbs through the opening and stays elevated across the "
+               "middlegame stretch, which lines up with middlegame being the "
+               "single worst phase above.")
 
 
 def motif_breakdown(df):
@@ -139,6 +178,9 @@ def motif_breakdown(df):
     st.dataframe(g, width="stretch")
     if n < MIN_N:
         st.caption(f"⚠️ Only {n} blunders (n) in this filter — motif shares are indicative only.")
+    st.caption("69.2% of blunders are tactical oversights and 26.7% are outright "
+               "hangs -- not subtle positional drift, mostly a piece left "
+               "undefended on the wrong square.")
 
 
 @st.cache_data
@@ -166,14 +208,43 @@ def board_before_move(game_url, ply):
     return board if board.ply() == ply else None
 
 
-def render_board_svg(board, arrows, flipped, caption):
-    svg = chess.svg.board(board, arrows=arrows, size=400, flipped=flipped)
-    st.components.v1.html(str(svg), height=420)
-    st.caption(caption)
+def worst_blunder_figure(row, size=250):
+    """One board figure for the static worst-blunders strip: played (red) vs.
+    engine best (slate), via theme.board_svg -- same colours as the big
+    interactive board below, just smaller and non-interactive."""
+    board = board_before_move(row.game_url, row.ply)
+    if board is None:
+        return None
+    try:
+        played = board.parse_san(row.san)
+    except ValueError:
+        return None
+    best = None
+    if row.best_san and row.best_san != row.san:
+        try:
+            best = board.parse_san(row.best_san)
+        except ValueError:
+            best = None
+    svg = board_svg(board, played=played, best=best, size=size)
+    caption = (f"<b>{row.san}</b> instead of {row.best_san} · "
+               f"wp_loss {row.wp_loss:.0f} · {row.motif}")
+    return {"svg": str(svg), "caption": caption}
+
+
+def worst_blunders_strip(df):
+    st.subheader("Three worst blunders")
+    if not len(df):
+        st.caption("no moves in this filter")
+        return
+    worst = df.nlargest(3, "wp_loss")
+    figures = [worst_blunder_figure(row) for _, row in worst.iterrows()]
+    figures = [f for f in figures if f]
+    if figures:
+        board_strip(st, figures)
 
 
 def render_worst_move(row):
-    """Blunders tab board: your move (red) vs. engine best (green)."""
+    """Blunders tab's big interactive board: your move (red) vs. engine best (slate)."""
     board = board_before_move(row.game_url, row.ply)
     if board is None:
         st.warning("couldn't find/reconstruct this position from the cached PGN")
@@ -183,21 +254,22 @@ def render_worst_move(row):
     except ValueError:
         st.warning(f"couldn't replay move {row.san!r} on the reconstructed board")
         return
-    arrows = [chess.svg.Arrow(played.from_square, played.to_square, color=QUALITY["mistake"])]
+    best = None
     if row.best_san and row.best_san != row.san:
-        best = board.parse_san(row.best_san)
-        arrows.append(chess.svg.Arrow(best.from_square, best.to_square, color=QUALITY["good"]))
-    render_board_svg(board, arrows, flipped=(row.color == "black"),
-                      caption=f"red = your move ({row.san}) · green = engine best ({row.best_san}) · "
-                              f"cpl {row.cpl:.0f} · wp_loss {row.wp_loss:.1f} · {row.motif}")
+        try:
+            best = board.parse_san(row.best_san)
+        except ValueError:
+            best = None
+    svg = board_svg(board, played=played, best=best, size=400)
+    st.components.v1.html(str(svg), height=420)
+    st.caption(f"red = your move ({row.san}) · slate = engine best ({row.best_san}) · "
+               f"cpl {row.cpl:.0f} · wp_loss {row.wp_loss:.1f} · {row.motif}")
     st.markdown(f"[open game on chess.com]({row.game_url})")
 
 
 def render_brilliancy_move(row):
-    """Sacrifices tab board: the sacrifice itself (no separate 'best move' here --
-    the played move IS the thing being evaluated). Reuses game_pgn_index() for the
-    PGN text and dashboard_ext.board_at() for the ply-from-move_no+color derivation,
-    rather than a second copy of either."""
+    """Sacrifices tab's big interactive board: the sacrifice itself, slate --
+    there's no separate 'best move' here, the played move IS the good one."""
     pgn = game_pgn_index().get(row.game_url)
     if pgn is None:
         st.warning("couldn't find the cached PGN for this game")
@@ -208,9 +280,9 @@ def render_brilliancy_move(row):
     except ValueError:
         st.warning(f"couldn't replay move {row.san!r} on the reconstructed board")
         return
-    arrows = [chess.svg.Arrow(move.from_square, move.to_square, color=QUALITY["brilliant"])]
-    render_board_svg(board, arrows, flipped=(row.color == "black"),
-                      caption=f"{row.san} · {row.piece} sacrifice · margin {row.margin}cp · {row.label}")
+    svg = board_svg(board, best=move, size=400)
+    st.components.v1.html(str(svg), height=420)
+    st.caption(f"{row.san} · {row.piece} sacrifice · margin {row.margin}cp · {row.label}")
     st.markdown(f"[open game on chess.com]({row.game_url})")
 
 
@@ -228,13 +300,15 @@ def worst_moves_table(df):
         render_worst_move(worst.iloc[event.selection.rows[0]])
 
 
-def blunders_tab():
-    df_all = load_data()
-    df = sidebar_filters(df_all)
-    st.caption(f"{len(df):,} moves / {df.game_url.nunique():,} games in view "
-               f"(of {len(df_all):,} moves / {df_all.game_url.nunique():,} total)")
-
+def blunders_tab(df):
+    st.write(
+        "Every rated rapid and blitz move I've played since January, scored by "
+        "Stockfish and by how much of my win probability each move actually cost -- "
+        "not just raw centipawns, which overstate severity once a position is "
+        "already decided."
+    )
     render_kpis(df)
+    trend_section(df)
     phase_section(df)
     left, right = st.columns(2)
     with left:
@@ -242,20 +316,27 @@ def blunders_tab():
     with right:
         move_no_section(df)
     motif_breakdown(df)
+    worst_blunders_strip(df)
     worst_moves_table(df)
 
 
 def sacrifices_tab():
-    sel = render_brilliancy_tab(st)
+    sel = render_brilliancy_tab(st, pgn_index=game_pgn_index())
     if sel is not None:
         render_brilliancy_move(sel)
 
 
 def main():
-    st.title("Chess leak analysis — jayeed101")
+    df_all = load_data()
+    df = sidebar_filters(df_all)
+    dateline = (f"{len(df):,} moves / {df.game_url.nunique():,} games in view "
+                f"(of {len(df_all):,} moves / {df_all.game_url.nunique():,} total)")
+    page_header(st, name="Zayeed Bin Kabir", handle="jayeed101",
+                linkedin_url=LINKEDIN_URL, dateline=dateline)
+
     tab_blunders, tab_sac = st.tabs(["Blunders", "Sacrifices"])
     with tab_blunders:
-        blunders_tab()
+        blunders_tab(df)
     with tab_sac:
         sacrifices_tab()
 

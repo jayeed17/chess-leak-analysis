@@ -1,117 +1,109 @@
-"""Theme + KPI cards for app.py.
+"""Theme + components for app.py — Wall Street Journal direction.
 
-    from theme import inject_theme, kpi_row, QUALITY
-    inject_theme(st)
-    kpi_row(st, [...])
+    from theme import (inject_theme, page_header, kpi_row, split_rate,
+                       SEVERITY, board_svg, board_strip, trend_chart)
 
-Palette comes from the chess.com board: light square #EEEED2 is the page, dark
-square #769656 is structure. KPI accents are the move-quality colors chess
-interfaces already use, so the colour tells you which class the number belongs to
-rather than just varying.
+Palette is newsprint: warm paper, black ink, hairline rules. Colour is reserved
+for severity and never used decoratively.
+
+The old board-green was actively misleading — in chess interfaces green means
+"good move", so colouring blunder bars green read as praise for the worst moves
+in the dataset. Severity now runs ochre -> orange -> red, so worse is visibly
+hotter, and the single non-severity accent (slate blue) marks things that went
+right.
 """
+import chess
+import chess.svg
 
-# board
-PAPER = "#EEEED2"      # light square — page
-PANEL = "#E4E4C4"      # light square, one step down — cards
-RULE = "#C3C9A5"       # hairline
-DARK = "#769656"       # dark square — structure, headers
-INK = "#22261A"        # board ink — body text
-MUTED = "#5C6350"      # secondary text
+# newsprint
+PAPER = "#F7F4ED"
+PANEL = "#FFFFFF"
+RULE = "#D6D0C4"
+HAIR = "#B8B1A3"
+INK = "#12100D"
+BODY = "#33302A"
+MUTED = "#6E685C"
 
-# move-quality accents
-QUALITY = {
-    "brilliant": "#1BACA6",
-    "good": "#769656",
-    "inaccuracy": "#C8952B",
-    "mistake": "#A93226",
-    "neutral": "#5C6350",
+# severity ramp — hotter is worse. Never use decoratively.
+SEVERITY = {
+    "blunder": "#9B1B21",
+    "mistake": "#C4551F",
+    "inaccuracy": "#D69A2D",
+    "good": "#2E5C7A",
+    "neutral": "#6E685C",
 }
 
 _CSS = f"""
 <style>
-  html, body, [class*="css"], .stApp,
-  [data-testid="stSidebar"], [data-testid="stMarkdownContainer"],
-  .stDataFrame, .stSelectbox, .stMultiSelect, button, input, label {{
+  html, body, [class*="css"], .stApp, [data-testid="stSidebar"],
+  [data-testid="stMarkdownContainer"], .stDataFrame, .stSelectbox,
+  .stMultiSelect, button, input, label, .stRadio {{
     font-family: "Times New Roman", Times, serif !important;
   }}
+  .stApp {{ background: {PAPER}; color: {BODY}; }}
+  [data-testid="stSidebar"] {{ background: {PAPER}; border-right: 1px solid {RULE}; }}
 
-  .stApp {{ background: {PAPER}; color: {INK}; }}
-  [data-testid="stSidebar"] {{
-    background: {PANEL};
-    border-right: 1px solid {RULE};
+  .masthead {{ text-align: center; margin: 0.4rem 0 0.2rem; }}
+  .masthead h1 {{
+    font-size: 3.4rem; font-weight: 700; color: {INK};
+    letter-spacing: -0.02em; line-height: 1.02; margin: 0;
+  }}
+  .masthead .byline {{ margin-top: 0.5rem; font-size: 1.02rem; color: {BODY}; }}
+  .masthead .byline a {{ color: {SEVERITY['good']}; text-decoration: none;
+                         border-bottom: 1px solid {RULE}; }}
+  .masthead .rules {{
+    border-top: 2px solid {INK}; border-bottom: 1px solid {HAIR};
+    height: 4px; margin: 0.9rem 0 0.3rem;
+  }}
+  .dateline {{
+    text-align: center; font-size: 0.9rem; color: {MUTED}; margin-bottom: 1.4rem;
   }}
 
-  h1, h2, h3 {{
-    color: {INK};
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    line-height: 1.15;
-  }}
-  h1 {{ font-size: 2.6rem; margin-bottom: 0.1em; }}
-  h2 {{ font-size: 1.6rem; }}
-  h3 {{ font-size: 1.2rem; }}
-
-  /* serif body wants more leading and a shorter measure */
+  h2 {{ font-size: 1.75rem; color: {INK}; font-weight: 700; margin-top: 1.8rem; }}
+  h3 {{ font-size: 1.25rem; color: {INK}; font-weight: 700; }}
   [data-testid="stMarkdownContainer"] p {{
-    line-height: 1.65;
-    max-width: 74ch;
-    color: {INK};
+    line-height: 1.7; max-width: 72ch; color: {BODY}; font-size: 1.05rem;
   }}
   [data-testid="stCaptionContainer"] p {{
-    color: {MUTED};
-    font-size: 0.92rem;
-    line-height: 1.55;
-    max-width: 74ch;
+    color: {MUTED}; font-size: 0.93rem; line-height: 1.6; max-width: 72ch;
   }}
 
-  .stTabs [data-baseweb="tab-list"] {{
-    gap: 1.75rem;
-    border-bottom: 1px solid {RULE};
-  }}
-  .stTabs [data-baseweb="tab"] {{
-    font-size: 1.05rem;
-    color: {MUTED};
-    padding: 0.4rem 0;
-  }}
-  .stTabs [aria-selected="true"] {{
-    color: {INK};
-    border-bottom: 2px solid {DARK};
-  }}
+  .stTabs [data-baseweb="tab-list"] {{ gap: 2rem; border-bottom: 1px solid {HAIR}; }}
+  .stTabs [data-baseweb="tab"] {{ font-size: 1.1rem; color: {MUTED}; padding: 0.4rem 0; }}
+  .stTabs [aria-selected="true"] {{ color: {INK}; border-bottom: 3px solid {INK}; }}
 
-  /* KPI card: quality colour on the left edge, number large, interval quiet */
-  .kpi-row {{ display: flex; gap: 0.9rem; flex-wrap: wrap; margin: 0.5rem 0 1.4rem; }}
+  .kpi-row {{
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-top: 1px solid {HAIR}; border-bottom: 1px solid {HAIR};
+    margin: 0.6rem 0 1.8rem; background: {PANEL};
+  }}
   .kpi {{
-    flex: 1 1 190px;
-    background: {PANEL};
-    border: 1px solid {RULE};
-    border-left: 4px solid var(--accent);
-    padding: 0.85rem 1rem 0.9rem;
+    flex: 1 1 200px; padding: 1.05rem 1.25rem 1.15rem;
+    border-right: 1px solid {RULE}; border-top: 3px solid var(--accent);
   }}
-  .kpi .label {{
-    font-size: 0.95rem;
-    color: {MUTED};
-    margin-bottom: 0.15rem;
-  }}
+  .kpi:last-child {{ border-right: none; }}
+  .kpi .label {{ font-size: 0.98rem; color: {MUTED}; margin-bottom: 0.3rem; }}
   .kpi .value {{
-    font-size: 2.15rem;
-    line-height: 1.05;
-    color: var(--accent);
-    font-variant-numeric: tabular-nums;
+    font-size: 3.1rem; font-weight: 700; line-height: 0.98;
+    color: {INK}; font-variant-numeric: tabular-nums;
   }}
   .kpi .sub {{
-    font-size: 0.85rem;
-    color: {MUTED};
+    font-size: 0.86rem; color: {MUTED}; margin-top: 0.4rem;
     font-variant-numeric: tabular-nums;
-    margin-top: 0.2rem;
   }}
-  .kpi.thin {{ border-left-style: dashed; }}
-  .kpi.thin .sub::after {{ content: " · thin sample"; color: {QUALITY['mistake']}; }}
+  .kpi.thin .sub::after {{ content: " · thin sample"; color: {SEVERITY['blunder']}; }}
+
+  .boards {{ display: flex; gap: 1.1rem; flex-wrap: wrap; margin: 0.8rem 0 1.4rem; }}
+  .board-fig {{ flex: 0 1 250px; }}
+  .board-fig svg {{ width: 100%; height: auto; border: 1px solid {RULE}; }}
+  .board-fig .cap {{
+    font-size: 0.88rem; color: {BODY}; line-height: 1.45;
+    margin-top: 0.45rem; border-top: 1px solid {RULE}; padding-top: 0.35rem;
+  }}
+  .board-fig .cap b {{ color: {INK}; }}
 
   .stDataFrame {{ border: 1px solid {RULE}; }}
-
-  @media (prefers-reduced-motion: reduce) {{
-    * {{ animation: none !important; transition: none !important; }}
-  }}
+  @media (prefers-reduced-motion: reduce) {{ * {{ animation: none !important; }} }}
 </style>
 """
 
@@ -120,32 +112,65 @@ def inject_theme(st):
     st.markdown(_CSS, unsafe_allow_html=True)
 
 
+def page_header(st, name, handle, linkedin_url, dateline):
+    st.markdown(
+        f'<div class="masthead"><h1>Chess Leak Analysis</h1>'
+        f'<div class="byline">{name} &middot; {handle} &middot; '
+        f'<a href="{linkedin_url}" target="_blank">LinkedIn</a></div>'
+        f'<div class="rules"></div></div>'
+        f'<div class="dateline">{dateline}</div>',
+        unsafe_allow_html=True)
+
+
 def kpi_row(st, items):
-    """items: list of dicts with keys
-         label   - sentence-case name
-         value   - the headline number, already formatted ('6.9%', '488')
-         sub     - optional interval / sample line ('CI 5.8-8.2 · n=2,239')
-         quality - key into QUALITY, picks the accent
-         thin    - optional bool, dashes the edge and flags the sample
-    """
+    """items: label, value, sub (optional), severity key, thin (optional bool)."""
     cards = []
     for it in items:
-        accent = QUALITY.get(it.get("quality", "neutral"), QUALITY["neutral"])
+        accent = SEVERITY.get(it.get("severity", "neutral"), SEVERITY["neutral"])
         cls = "kpi thin" if it.get("thin") else "kpi"
         sub = f'<div class="sub">{it["sub"]}</div>' if it.get("sub") else ""
-        cards.append(
-            f'<div class="{cls}" style="--accent:{accent}">'
-            f'<div class="label">{it["label"]}</div>'
-            f'<div class="value">{it["value"]}</div>{sub}</div>'
-        )
+        cards.append(f'<div class="{cls}" style="--accent:{accent}">'
+                     f'<div class="label">{it["label"]}</div>'
+                     f'<div class="value">{it["value"]}</div>{sub}</div>')
     st.markdown(f'<div class="kpi-row">{"".join(cards)}</div>', unsafe_allow_html=True)
 
 
 def split_rate(k, n, decimals=1):
-    """rate_ci() returns one long string, which is what breaks st.metric.
-    This splits it into (value, sub) for a KPI card."""
     from dashboard_ext import wilson
     if n == 0:
         return "no data", ""
     lo, hi = wilson(k, n)
-    return f"{100*k/n:.{decimals}f}%", f"CI {lo:.1f}–{hi:.1f} · n={n:,}"
+    return f"{100*k/n:.{decimals}f}%", f"CI {lo:.1f}\u2013{hi:.1f} \u00b7 n={n:,}"
+
+
+def board_svg(board, played=None, best=None, size=250):
+    """Board with the played move in blunder-red, the engine's move in slate."""
+    arrows = []
+    if played is not None:
+        arrows.append(chess.svg.Arrow(played.from_square, played.to_square,
+                                      color=SEVERITY["blunder"]))
+    if best is not None:
+        arrows.append(chess.svg.Arrow(best.from_square, best.to_square,
+                                      color=SEVERITY["good"]))
+    return chess.svg.board(board, arrows=arrows, size=size,
+                           orientation=board.turn, coordinates=False)
+
+
+def board_strip(st, figures):
+    """figures: list of dicts with 'svg' and 'caption' (caption may contain <b>)."""
+    html = "".join(f'<div class="board-fig">{f["svg"]}'
+                   f'<div class="cap">{f["caption"]}</div></div>' for f in figures)
+    st.markdown(f'<div class="boards">{html}</div>', unsafe_allow_html=True)
+
+
+def trend_chart(st, df, metric_label, value_col, freq="W", color=None):
+    """Weekly trend line over end_time. Returns the series."""
+    import pandas as pd
+    d = df.dropna(subset=["end_time"]).copy()
+    d["period"] = pd.to_datetime(d.end_time).dt.to_period(freq).dt.to_timestamp()
+    s = d.groupby("period")[value_col].mean()
+    if d[value_col].dtype == bool or value_col in ("blunder", "won", "played_best"):
+        s = s * 100
+    st.line_chart(s.rename(metric_label),
+                  color=color or SEVERITY["blunder"], height=280)
+    return s

@@ -63,8 +63,34 @@ def board_at(pgn_text, move_no, color):
     return board
 
 
-def render_brilliancy_tab(st, path="data/brilliancies.parquet"):
-    """Streamlit tab for sacrifice analysis. Pass the streamlit module as `st`."""
+def _brilliancy_figure(row, pgn_index, size=250):
+    """One board figure for a brilliant row: the sacrifice itself in slate
+    (board_svg's `best` colour) -- there's no separate 'best move' here, the
+    played move IS the thing being evaluated."""
+    from theme import board_svg
+    pgn = pgn_index.get(row.game_url)
+    if pgn is None:
+        return None
+    board = board_at(pgn, row.move_no, row.color)
+    try:
+        move = board.parse_san(row.san)
+    except ValueError:
+        return None
+    svg = board_svg(board, best=move, size=size)
+    caption = (f"<b>{row.san}</b> · {row.piece} sacrifice · "
+               f"margin {row.margin}cp · {row.label}")
+    return {"svg": str(svg), "caption": caption}
+
+
+def render_brilliancy_tab(st, path="data/brilliancies.parquet", pgn_index=None):
+    """Streamlit tab for sacrifice analysis. Pass the streamlit module as `st`.
+
+    pgn_index: game_url -> PGN text, from app.py's cached game_pgn_index() --
+    reused here rather than a second archive-scanning implementation, purely
+    to render the board strips.
+    """
+    from theme import kpi_row, split_rate, board_strip
+
     try:
         df = pd.read_parquet(path)
     except FileNotFoundError:
@@ -73,8 +99,23 @@ def render_brilliancy_tab(st, path="data/brilliancies.parquet"):
 
     df["sound"] = df.label.isin(SOUND)
     eligible = df[df.label != "sac_while_winning"]      # see note below
+    brilliant = df[df.label == "brilliant"].sort_values("margin", ascending=False)
 
     st.subheader("Sacrifices")
+    st.write(
+        "Every move where I put material at risk, checked at depth 18 against the "
+        "runner-up move: 739 attempts, 3.1% sound overall, 4.6% once positions I was "
+        "already winning easily are excluded from the denominator (see below), and "
+        "9 that met the bar for brilliant — sound *and* essentially the only move "
+        "that worked."
+    )
+
+    if pgn_index is not None and len(brilliant):
+        lead = [_brilliancy_figure(r, pgn_index) for _, r in brilliant.head(3).iterrows()]
+        lead = [f for f in lead if f]
+        if lead:
+            board_strip(st, lead)
+
     st.caption(
         "A sacrifice is scored against the **eligible** denominator: sound + unsound. "
         "`sac_while_winning` (engine eval already >500cp) is excluded because those "
@@ -86,13 +127,12 @@ def render_brilliancy_tab(st, path="data/brilliancies.parquet"):
     # rate_ci() is one long string ('6.9% (CI 5.8-8.2, n=2,239)') -- st.metric
     # renders it at display size, which wraps and clips. kpi_row/split_rate
     # split the headline number from its interval instead.
-    from theme import kpi_row, split_rate
     sound_value, sound_sub = split_rate(int(eligible.sound.sum()), len(eligible))
     kpi_row(st, [
-        {"label": "Attempts", "value": f"{len(df):,}", "quality": "neutral"},
-        {"label": "Sound", "value": sound_value, "sub": sound_sub, "quality": "good",
+        {"label": "Attempts", "value": f"{len(df):,}", "severity": "neutral"},
+        {"label": "Sound", "value": sound_value, "sub": sound_sub, "severity": "good",
          "thin": len(eligible) < MIN_N},
-        {"label": "Brilliant", "value": f"{int((df.label == 'brilliant').sum())}", "quality": "brilliant"},
+        {"label": "Brilliant", "value": f"{int((df.label == 'brilliant').sum())}", "severity": "good"},
     ])
 
     st.write("**Label breakdown**")
@@ -124,10 +164,17 @@ def render_brilliancy_tab(st, path="data/brilliancies.parquet"):
         st.dataframe(conv, use_container_width=True)
 
     st.write("**Your brilliancies**")
-    b = df[df.label == "brilliant"].sort_values("margin", ascending=False)
+    b = brilliant
     if not len(b):
         st.info("No moves met the brilliant bar. At this rating that's an ordinary result.")
         return
+
+    if pgn_index is not None and len(b) > 3:
+        more = [_brilliancy_figure(r, pgn_index) for _, r in b.iloc[3:6].iterrows()]
+        more = [f for f in more if f]
+        if more:
+            board_strip(st, more)
+
     st.dataframe(
         b[["end_time", "time_class", "move_no", "san", "piece", "margin", "won", "game_url"]],
         hide_index=True, use_container_width=True)

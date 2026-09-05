@@ -4,3 +4,10 @@ __pycache__/
 *.pyc
 *.parquet
 .DS_Store
+
+# public_data/ is the deploy-time export (export_public.py) -- small,
+# self-contained, meant to be committed so Streamlit Community Cloud has
+# something to read. Everything under data/ (including data/raw/, the PGN
+# cache) stays ignored regardless -- it's the full local pipeline output.
+!public_data/
+!public_data/*.parquet

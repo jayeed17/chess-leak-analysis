@@ -2,6 +2,13 @@
 
 Usage: streamlit run app.py
 
+Reads data/ (the full local pipeline output) when present, falling back to
+public_data/ (a small, pre-exported subset committed to the repo -- see
+export_public.py) when it isn't. That's the case on Streamlit Community
+Cloud: a fresh git clone has no data/ (gitignored) and no data/raw/ PGN
+cache, so the deployed app runs entirely off public_data/. Locally, nothing
+changes -- data/ is always checked first.
+
 Note: "blunder" here means wp_loss >= 20 (win-probability loss), not the
 parquet's cpl-based `blunder` column. See report.py/model.py's comparison of
 the two -- cpl alone overstates severity in already-decided positions
@@ -12,17 +19,27 @@ rate_table) -- a filtered slice can drop to a handful of blunders, and a bare
 percentage on 8 events is exactly how the piece and time-control findings
 this project later retracted got made in the first place.
 """
-import glob, io, json
+import glob, io, json, os
 
 import chess, chess.pgn
 import pandas as pd
 import streamlit as st
 
-from dashboard_ext import wilson, rate_table, overlapping, render_brilliancy_tab, board_at, MIN_N
+from dashboard_ext import wilson, rate_table, overlapping, render_brilliancy_tab, ply_for_brilliancy, MIN_N
 from theme import (inject_theme, page_header, kpi_row, split_rate, SEVERITY, BAR_BASE,
                     board_svg, board_strip, severity_bar, trend_chart)
 
-DATA_PATH = "data/moves.parquet"
+
+def _first_existing(*paths):
+    """First path that exists on disk; the last one otherwise, so a missing
+    file still fails with a clear FileNotFoundError instead of silently
+    picking nothing."""
+    return next((p for p in paths if os.path.exists(p)), paths[-1])
+
+
+DATA_PATH = _first_existing("data/moves.parquet", "public_data/moves.parquet")
+BRILLIANCIES_PATH = _first_existing("data/brilliancies.parquet", "public_data/brilliancies.parquet")
+PUBLIC_BOARDS_PATH = "public_data/boards.parquet"
 RAW_GLOB = "data/raw/*/*.json"
 BLUNDER_WP = 20  # wp_loss threshold used throughout this dashboard
 LINKEDIN_URL = "https://www.linkedin.com/in/zayeed-bin-kabir/"
@@ -209,7 +226,9 @@ def motif_breakdown(df):
 
 @st.cache_data
 def game_pgn_index():
-    """game_url -> raw PGN text, built once from the cached monthly archives."""
+    """game_url -> raw PGN text, built once from the cached monthly archives.
+    Empty on Streamlit Community Cloud -- data/raw/ isn't in the repo -- which
+    is exactly the condition board_before_move() below falls back on."""
     index = {}
     for f in glob.glob(RAW_GLOB):
         for g in json.loads(open(f).read()).get("games", []):
@@ -218,18 +237,37 @@ def game_pgn_index():
     return index
 
 
+@st.cache_data
+def load_boards():
+    """Precomputed FEN for the positions the board strips display -- built by
+    export_public.py. Only consulted when the PGN cache (data/raw/) isn't
+    available, which is the public deployment's normal state by design (it
+    has no data/raw/ at all, so game_pgn_index() above is always empty)."""
+    try:
+        b = pd.read_parquet(PUBLIC_BOARDS_PATH)
+    except FileNotFoundError:
+        b = pd.DataFrame(columns=["game_url", "ply", "fen", "played_uci", "best_uci", "caption"])
+    return b.set_index(["game_url", "ply"])
+
+
 def board_before_move(game_url, ply):
-    """Replay the cached PGN to the position with `ply` half-moves already played."""
+    """Board with `ply` half-moves already played. PGN cache first (replays
+    the actual game -- works for any position, that's the local dev case);
+    precomputed FEN second (only covers the ~9 positions the board strips
+    show, but needs no PGN at all -- that's the public deployment case).
+    None if neither has this position."""
     pgn = game_pgn_index().get(game_url)
-    if pgn is None:
-        return None
-    game = chess.pgn.read_game(io.StringIO(pgn))
-    board = game.board()
-    for node in game.mainline():
-        if board.ply() == ply:
-            return board
-        board.push(node.move)
-    return board if board.ply() == ply else None
+    if pgn is not None:
+        game = chess.pgn.read_game(io.StringIO(pgn))
+        board = game.board()
+        for node in game.mainline():
+            if board.ply() == ply:
+                return board
+            board.push(node.move)
+        return board if board.ply() == ply else None
+    boards = load_boards()
+    key = (game_url, ply)
+    return chess.Board(boards.loc[key, "fen"]) if key in boards.index else None
 
 
 def worst_blunder_figure(row, size=250):
@@ -294,11 +332,11 @@ def render_worst_move(row):
 def render_brilliancy_move(row):
     """Sacrifices tab's big interactive board: the sacrifice itself, slate --
     there's no separate 'best move' here, the played move IS the good one."""
-    pgn = game_pgn_index().get(row.game_url)
-    if pgn is None:
-        st.warning("couldn't find the cached PGN for this game")
+    board = board_before_move(row.game_url, ply_for_brilliancy(row.move_no, row.color))
+    if board is None:
+        st.warning("couldn't find/reconstruct this position -- no PGN cache and it "
+                    "isn't one of the precomputed board-strip positions")
         return
-    board = board_at(pgn, row.move_no, row.color)
     try:
         move = board.parse_san(row.san)
     except ValueError:
@@ -345,7 +383,7 @@ def blunders_tab(df):
 
 
 def sacrifices_tab():
-    sel = render_brilliancy_tab(st, pgn_index=game_pgn_index())
+    sel = render_brilliancy_tab(st, path=BRILLIANCIES_PATH, board_lookup=board_before_move)
     if sel is not None:
         render_brilliancy_move(sel)
 

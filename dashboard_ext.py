@@ -4,7 +4,6 @@ Import into app.py:
     from dashboard_ext import wilson, rate_ci, rate_table, render_brilliancy_tab
 """
 import math
-import chess
 import pandas as pd
 
 MIN_N = 100          # below this, a rate is too thin to show without a warning
@@ -49,29 +48,27 @@ def overlapping(g):
                for i, a in enumerate(rows) for b in rows[i + 1:])
 
 
-def board_at(pgn_text, move_no, color):
-    """Rebuild the position before a brilliancy. brilliancies.parquet stores
-    move_no + color but not ply, so derive it: ply = (move_no-1)*2 + side."""
-    import io, chess.pgn
-    game = chess.pgn.read_game(io.StringIO(pgn_text))
-    target = (move_no - 1) * 2 + (0 if color == "white" else 1)
-    board = game.board()
-    for node in game.mainline():
-        if board.ply() == target:
-            return board
-        board.push(node.move)
-    return board
+def ply_for_brilliancy(move_no, color):
+    """brilliancies.parquet stores move_no + color but not ply -- derive it,
+    the same way build_dataset.py's ply column is defined: half-moves already
+    played before this one. ply = (move_no-1)*2 + (0 if white else 1)."""
+    return (move_no - 1) * 2 + (0 if color == "white" else 1)
 
 
-def _brilliancy_figure(row, pgn_index, size=250):
+def _brilliancy_figure(row, board_lookup, size=250):
     """One board figure for a brilliant row: the sacrifice itself in slate
     (board_svg's `best` colour) -- there's no separate 'best move' here, the
-    played move IS the thing being evaluated."""
+    played move IS the thing being evaluated.
+
+    board_lookup(game_url, ply) -> chess.Board | None is app.py's
+    board_before_move -- PGN-replay locally, precomputed FEN when the PGN
+    cache is absent (the public deployment). No PGN-handling code lives in
+    this file anymore; it all goes through that one shared lookup.
+    """
     from theme import board_svg
-    pgn = pgn_index.get(row.game_url)
-    if pgn is None:
+    board = board_lookup(row.game_url, ply_for_brilliancy(row.move_no, row.color))
+    if board is None:
         return None
-    board = board_at(pgn, row.move_no, row.color)
     try:
         move = board.parse_san(row.san)
     except ValueError:
@@ -82,12 +79,12 @@ def _brilliancy_figure(row, pgn_index, size=250):
     return {"svg": str(svg), "caption": caption}
 
 
-def render_brilliancy_tab(st, path="data/brilliancies.parquet", pgn_index=None):
+def render_brilliancy_tab(st, path="data/brilliancies.parquet", board_lookup=None):
     """Streamlit tab for sacrifice analysis. Pass the streamlit module as `st`.
 
-    pgn_index: game_url -> PGN text, from app.py's cached game_pgn_index() --
-    reused here rather than a second archive-scanning implementation, purely
-    to render the board strips.
+    board_lookup(game_url, ply) -> chess.Board | None: app.py's
+    board_before_move, reused here rather than a second PGN-handling
+    implementation, purely to render the board strips.
     """
     from theme import kpi_row, split_rate, board_strip
 
@@ -110,8 +107,8 @@ def render_brilliancy_tab(st, path="data/brilliancies.parquet", pgn_index=None):
         "that worked."
     )
 
-    if pgn_index is not None and len(brilliant):
-        lead = [_brilliancy_figure(r, pgn_index) for _, r in brilliant.head(3).iterrows()]
+    if board_lookup is not None and len(brilliant):
+        lead = [_brilliancy_figure(r, board_lookup) for _, r in brilliant.head(3).iterrows()]
         lead = [f for f in lead if f]
         if lead:
             board_strip(st, lead)
@@ -169,8 +166,8 @@ def render_brilliancy_tab(st, path="data/brilliancies.parquet", pgn_index=None):
         st.info("No moves met the brilliant bar. At this rating that's an ordinary result.")
         return
 
-    if pgn_index is not None and len(b) > 3:
-        more = [_brilliancy_figure(r, pgn_index) for _, r in b.iloc[3:6].iterrows()]
+    if board_lookup is not None and len(b) > 3:
+        more = [_brilliancy_figure(r, board_lookup) for _, r in b.iloc[3:6].iterrows()]
         more = [f for f in more if f]
         if more:
             board_strip(st, more)
@@ -182,6 +179,6 @@ def render_brilliancy_tab(st, path="data/brilliancies.parquet", pgn_index=None):
     pick = st.selectbox("Show position", b.index,
                         format_func=lambda i: f"move {b.loc[i,'move_no']} — {b.loc[i,'san']} "
                                               f"({b.loc[i,'piece']}, margin {b.loc[i,'margin']}cp)")
-    st.caption("Board rendering reuses the PGN-replay path already in app.py — "
-               "pass the cached PGN for this game_url into board_at().")
+    st.caption("Board rendering reuses app.py's board_before_move() -- PGN cache "
+               "locally, precomputed FEN in the public deployment.")
     return b.loc[pick]

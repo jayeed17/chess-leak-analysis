@@ -22,6 +22,56 @@ FEATURES = [
 CAT = ["phase", "color", "time_class"]
 
 
+LEAKS = {
+    "blunders under 30s on the clock": lambda d: (d.clock_left < 30) & d.blunder,
+    "blunders in the opening (<=move 12)": lambda d: (d.phase == "opening") & d.blunder,
+    "blunders in the middlegame": lambda d: (d.phase == "middlegame") & d.blunder,
+    "hanging a piece outright": lambda d: d.motif.fillna("").str.startswith("hangs_") & d.blunder,
+    "blunders after opponent captured": lambda d: d.opp_last_was_capture & d.blunder,
+}
+
+
+def leak_removed_counts(df, per_game):
+    """Per-game count of blunders matching each leak, aligned to per_game's row order."""
+    return {name: df[mask_fn(df)].groupby("game_url").size().reindex(per_game.index).fillna(0)
+            for name, mask_fn in LEAKS.items()}
+
+
+def leak_elo(per_game, removed_counts):
+    """Remove each leak's blunders from every game, recompute win rate off the
+    empirical blunders-in-game -> win-rate curve, convert the shift to Elo."""
+    wp = per_game.groupby(per_game.blunders.clip(upper=5)).won.mean()
+    base = per_game.won.mean()
+    out = {}
+    for name, removed in removed_counts.items():
+        adj = (per_game.blunders - removed).clip(lower=0)
+        proj = wp.reindex(adj.clip(upper=5)).mean()
+        d_wp = proj - base
+        elo = 400 * np.log10(max(base + d_wp, .01) / max(1 - base - d_wp, .01)) - \
+              400 * np.log10(max(base, .01) / max(1 - base, .01))
+        out[name] = (d_wp, elo)
+    return out
+
+
+def bootstrap_leak_ci(per_game, removed_counts, n_boot=2000, seed=0):
+    """95% percentile CI on each leak's Elo estimate, resampling games with replacement.
+
+    The point estimate alone reads as more precise than it is -- some of these
+    leaks move very few games, and the win-rate-by-blunder-count curve itself is
+    thin in spots. This puts a number on that uncertainty instead of hiding it.
+    """
+    rng = np.random.default_rng(seed)
+    n = len(per_game)
+    elos = {name: [] for name in removed_counts}
+    for _ in range(n_boot):
+        idx = rng.integers(0, n, n)
+        pg_b = per_game.iloc[idx].reset_index(drop=True)
+        removed_b = {name: r.iloc[idx].reset_index(drop=True) for name, r in removed_counts.items()}
+        for name, (_, elo) in leak_elo(pg_b, removed_b).items():
+            elos[name].append(elo)
+    return {name: np.percentile(vals, [2.5, 97.5]) for name, vals in elos.items()}
+
+
 def prep(df):
     X = df[FEATURES].copy()
     for c in CAT:
@@ -81,21 +131,15 @@ def main():
     print("\nwin rate by blunders in the game:")
     print((wp * 100).round(1).to_string())
 
-    base = per_game.won.mean()
-    for leak, mask in {
-        "blunders under 30s on the clock": (df.clock_left < 30) & df.blunder,
-        "blunders in the opening (<=move 12)": (df.phase == "opening") & df.blunder,
-        "hanging a piece outright": df.motif.fillna("").str.startswith("hangs_") & df.blunder,
-        "blunders after opponent captured": df.opp_last_was_capture & df.blunder,
-    }.items():
-        removed = df[mask].groupby("game_url").size()
-        adj = (per_game.blunders - removed.reindex(per_game.index).fillna(0)).clip(lower=0)
-        proj = wp.reindex(adj.clip(upper=5)).mean()
-        d_wp = proj - base
-        elo = 400 * np.log10(max(base + d_wp, .01) / max(1 - base - d_wp, .01)) - \
-              400 * np.log10(max(base, .01) / max(1 - base, .01))
-        print(f"  fix '{leak}': +{d_wp*100:.1f} win% ≈ +{elo:.0f} Elo  "
-              f"({int(mask.sum())} moves)")
+    removed_counts = leak_removed_counts(df, per_game)
+    point = leak_elo(per_game, removed_counts)
+    ci = bootstrap_leak_ci(per_game, removed_counts)
+    ranked = sorted(point.items(), key=lambda kv: kv[1][1], reverse=True)
+    for name, (d_wp, elo) in ranked:
+        lo, hi = ci[name]
+        n_moves = int(LEAKS[name](df).sum())
+        print(f"  fix '{name}': +{d_wp*100:.1f} win% ≈ +{elo:.0f} Elo "
+              f"(95% CI {lo:.0f} to {hi:.0f})  ({n_moves} moves)")
 
     # --- rating trajectory ---
     print("\n" + "=" * 60)

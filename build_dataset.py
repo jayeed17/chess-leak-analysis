@@ -3,7 +3,7 @@
 Usage:  python build_dataset.py <username> [--depth 12] [--since 2025/01] [--workers 4]
 Output: data/moves.parquet
 """
-import argparse, glob, io, re, os, datetime as dt
+import argparse, glob, io, math, re, os, datetime as dt
 from concurrent.futures import ProcessPoolExecutor
 
 import chess, chess.pgn, chess.engine
@@ -36,6 +36,11 @@ def phase(board):
 def cp(score, pov):
     """Score -> centipawns from `pov`, mates clamped."""
     return score.pov(pov).score(mate_score=2000)
+
+
+def win_pct(cp_val):
+    """Centipawns -> win probability (Lichess's logistic fit), 0-100."""
+    return 50 + 50 * (2 / (1 + math.exp(-0.00368208 * cp_val)) - 1)
 
 
 def hanging_value(board, color):
@@ -119,6 +124,7 @@ def analyse_game(args):
             reply = after_info["pv"][0] if after_info.get("pv") else None
 
             loss = max(0, best_cp - actual_cp)
+            wp_loss = max(0, win_pct(best_cp) - win_pct(actual_cp))
             c = clk_seconds(node.comment)
             spent = (prev_clk - c) if (prev_clk is not None and c is not None) else None
             prev_clk = c
@@ -146,6 +152,7 @@ def analyse_game(args):
                 "eval_before": best_cp,
                 "eval_after": actual_cp,
                 "cpl": loss,
+                "wp_loss": wp_loss,
                 "blunder": loss >= 200,
                 "mistake": 100 <= loss < 200,
                 "inaccuracy": 50 <= loss < 100,
@@ -159,7 +166,10 @@ def analyse_game(args):
                 "material_diff": sum(
                     PIECE_VAL[p] * (len(before.pieces(p, me)) - len(before.pieces(p, not me)))
                     for p in PIECE_VAL),
-                "motif": motif(board, reply, me) if loss >= 200 else None,
+                # computed for every move, not gated on the cpl blunder threshold --
+                # otherwise a different blunder definition (e.g. wp_loss-based) would
+                # silently lose motif labels for moves that only cross the new bar
+                "motif": motif(board, reply, me),
             })
     return rows
 

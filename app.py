@@ -18,13 +18,16 @@ import chess, chess.pgn, chess.svg
 import pandas as pd
 import streamlit as st
 
-from dashboard_ext import wilson, rate_ci, rate_table, overlapping, render_brilliancy_tab, board_at, MIN_N
+from dashboard_ext import wilson, rate_table, overlapping, render_brilliancy_tab, board_at, MIN_N
+from theme import inject_theme, kpi_row, split_rate, QUALITY
 
 DATA_PATH = "data/moves.parquet"
 RAW_GLOB = "data/raw/*/*.json"
 BLUNDER_WP = 20  # wp_loss threshold used throughout this dashboard
+BAR_COLOR = "#769656"  # theme.DARK -- board dark-square color, all st.bar_chart bars
 
 st.set_page_config(page_title="chess leak analysis", layout="wide")
+inject_theme(st)
 
 
 @st.cache_data
@@ -51,16 +54,27 @@ def sidebar_filters(df):
     return df[mask]
 
 
-def kpi_row(df):
+def render_kpis(df):
+    """Top KPI row. Uses theme.kpi_row/split_rate rather than st.metric --
+    rate_ci()'s one-line string ('6.9% (CI 5.8-8.2, n=2,239)') rendered at
+    st.metric's display size wraps and clips; kpi_row splits value from
+    interval so only the headline number is large."""
+    if not len(df):
+        kpi_row(st, [{"label": "Mean wp_loss", "value": "-", "quality": "neutral"}])
+        return
     current = df.sort_values("end_time").my_rating.dropna()
-    cols = st.columns(4)
-    cols[0].metric("Mean wp_loss", f"{df.wp_loss.mean():.1f}" if len(df) else "-",
-                    help="Win-probability points lost per move, on average. Replaces ACPL "
-                         "(cpl-based) -- cpl inflates in already-decided positions.")
-    cols[1].metric(f"Blunder rate (wp_loss≥{BLUNDER_WP})",
-                    rate_ci(int(df.is_blunder.sum()), len(df)) if len(df) else "-")
-    cols[2].metric("Best-move rate", rate_ci(int(df.played_best.sum()), len(df)) if len(df) else "-")
-    cols[3].metric("Rating (in filter)", f"{current.iloc[-1]:.0f}" if len(current) else "-")
+    thin = len(df) < MIN_N
+    blunder_value, blunder_sub = split_rate(int(df.is_blunder.sum()), len(df))
+    best_value, best_sub = split_rate(int(df.played_best.sum()), len(df))
+    kpi_row(st, [
+        {"label": "Mean wp_loss", "value": f"{df.wp_loss.mean():.1f}", "quality": "inaccuracy"},
+        {"label": f"Blunder rate (wp_loss≥{BLUNDER_WP})", "value": blunder_value, "sub": blunder_sub,
+         "quality": "mistake", "thin": thin},
+        {"label": "Best-move rate", "value": best_value, "sub": best_sub,
+         "quality": "good", "thin": thin},
+        {"label": "Rating (in filter)",
+         "value": f"{current.iloc[-1]:.0f}" if len(current) else "-", "quality": "brilliant"},
+    ])
 
 
 def render_rate_section(df, group_col, title, order=None):
@@ -81,7 +95,7 @@ def render_rate_section(df, group_col, title, order=None):
         # st.bar_chart re-sorts a plain string index alphabetically regardless of
         # row order -- an ordered CategoricalIndex is what actually gets respected
         g.index = pd.CategoricalIndex(g.index, categories=order, ordered=True)
-    st.bar_chart(g["rate_%"])
+    st.bar_chart(g["rate_%"], color=BAR_COLOR)
     st.dataframe(g, width="stretch")
     if overlapping(g):
         st.caption("⚠️ All intervals overlap — no group separates from any other. "
@@ -121,7 +135,7 @@ def motif_breakdown(df):
     bounds = [wilson(c, n) for c in g["count"]]
     g["ci_low"] = [round(b[0], 1) for b in bounds]
     g["ci_high"] = [round(b[1], 1) for b in bounds]
-    st.bar_chart(g["share_%"])
+    st.bar_chart(g["share_%"], color=BAR_COLOR)
     st.dataframe(g, width="stretch")
     if n < MIN_N:
         st.caption(f"⚠️ Only {n} blunders (n) in this filter — motif shares are indicative only.")
@@ -169,10 +183,10 @@ def render_worst_move(row):
     except ValueError:
         st.warning(f"couldn't replay move {row.san!r} on the reconstructed board")
         return
-    arrows = [chess.svg.Arrow(played.from_square, played.to_square, color="#cc0000")]
+    arrows = [chess.svg.Arrow(played.from_square, played.to_square, color=QUALITY["mistake"])]
     if row.best_san and row.best_san != row.san:
         best = board.parse_san(row.best_san)
-        arrows.append(chess.svg.Arrow(best.from_square, best.to_square, color="#00aa00"))
+        arrows.append(chess.svg.Arrow(best.from_square, best.to_square, color=QUALITY["good"]))
     render_board_svg(board, arrows, flipped=(row.color == "black"),
                       caption=f"red = your move ({row.san}) · green = engine best ({row.best_san}) · "
                               f"cpl {row.cpl:.0f} · wp_loss {row.wp_loss:.1f} · {row.motif}")
@@ -194,7 +208,7 @@ def render_brilliancy_move(row):
     except ValueError:
         st.warning(f"couldn't replay move {row.san!r} on the reconstructed board")
         return
-    arrows = [chess.svg.Arrow(move.from_square, move.to_square, color="#1a7a1a")]
+    arrows = [chess.svg.Arrow(move.from_square, move.to_square, color=QUALITY["brilliant"])]
     render_board_svg(board, arrows, flipped=(row.color == "black"),
                       caption=f"{row.san} · {row.piece} sacrifice · margin {row.margin}cp · {row.label}")
     st.markdown(f"[open game on chess.com]({row.game_url})")
@@ -220,7 +234,7 @@ def blunders_tab():
     st.caption(f"{len(df):,} moves / {df.game_url.nunique():,} games in view "
                f"(of {len(df_all):,} moves / {df_all.game_url.nunique():,} total)")
 
-    kpi_row(df)
+    render_kpis(df)
     phase_section(df)
     left, right = st.columns(2)
     with left:

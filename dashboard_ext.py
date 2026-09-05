@@ -83,10 +83,17 @@ def render_brilliancy_tab(st, path="data/brilliancies.parquet"):
         "first version of this analysis wrong."
     )
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Attempts", f"{len(df):,}")
-    c2.metric("Sound", rate_ci(int(eligible.sound.sum()), len(eligible)))
-    c3.metric("Brilliant", f"{int((df.label == 'brilliant').sum())}")
+    # rate_ci() is one long string ('6.9% (CI 5.8-8.2, n=2,239)') -- st.metric
+    # renders it at display size, which wraps and clips. kpi_row/split_rate
+    # split the headline number from its interval instead.
+    from theme import kpi_row, split_rate
+    sound_value, sound_sub = split_rate(int(eligible.sound.sum()), len(eligible))
+    kpi_row(st, [
+        {"label": "Attempts", "value": f"{len(df):,}", "quality": "neutral"},
+        {"label": "Sound", "value": sound_value, "sub": sound_sub, "quality": "good",
+         "thin": len(eligible) < MIN_N},
+        {"label": "Brilliant", "value": f"{int((df.label == 'brilliant').sum())}", "quality": "brilliant"},
+    ])
 
     st.write("**Label breakdown**")
     counts = df.label.value_counts().rename_axis("label").reset_index(name="count")

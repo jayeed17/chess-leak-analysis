@@ -1,7 +1,19 @@
 # chess-leak-analysis
 
+**Live dashboard: [ADD YOUR STREAMLIT COMMUNITY CLOUD URL HERE]**
+
+![Dashboard screenshot](docs/dashboard_screenshot.png)
+
 Analyzed ~1,024 of my own Chess.com games (rapid + blitz, 2026) with Stockfish at
 depth 12-18 to find where my rating actually leaks — not where I assumed it did.
+
+**Two ways to run this.** The live dashboard above is a read-only view over
+`public_data/` — a small, pre-exported snapshot of my results, committed to this
+repo so it deploys with nothing to configure. It's the fast path if you just want
+to see the findings. Regenerating the analysis for yourself (a different
+Chess.com username, fresh games, different depth) is the other path: that needs
+Stockfish installed locally and takes the full pipeline below, since it's doing
+real engine analysis, not reading a snapshot.
 
 ## Findings
 
@@ -99,7 +111,7 @@ python report.py                                             # where + when you 
 python model.py                                              # ML layer + Elo leak valuation (see Limitations)
 python brilliancy.py YOUR_USERNAME --depth 18                 # sound-sacrifice / brilliancy detection
 python drill.py                                               # -> data/drills/worst_100.pgn, import into a Lichess Study
-streamlit run app.py                                          # interactive dashboard over moves.parquet
+streamlit run app.py                                          # interactive dashboard, reads data/ locally
 ```
 
 Depth 12 ≈ 0.15s/move. ~1,000 blitz+rapid games ≈ 32k of your moves ≈ 15-20 min
@@ -107,6 +119,21 @@ on 7-8 cores. Start with `--since 2026/01 --time-class blitz,rapid` while
 iterating. `brilliancy.py` is slower per-candidate (depth 18, multipv=2) but
 only runs on the ~1-2% of moves that offer material, so a full run still lands
 around an hour, not days — check progress before assuming it's stuck.
+
+To (re-)publish the live dashboard once you're happy with a run:
+
+```bash
+python export_public.py                                      # data/ -> public_data/ (small, no PGNs)
+git add public_data/ && git commit -m "update public dataset" && git push
+```
+
+`data/` (including the `data/raw/` PGN cache) is gitignored and never leaves your
+machine. `public_data/` is the opposite on purpose: small (a few hundred KB),
+scoped to exactly the columns `app.py` reads, and committed so Streamlit
+Community Cloud has something to serve without needing Stockfish, a Chess.com
+username, or the PGN cache at all. `app.py` reads `data/` when present and falls
+back to `public_data/` otherwise — that's what makes the same file work
+unmodified on your machine and on the deployed server.
 
 ## Files
 
@@ -118,7 +145,8 @@ around an hour, not days — check progress before assuming it's stuck.
 | `model.py` | Gradient-boosted P(blunder) model with `GroupKFold` on game_url (no leakage from the same game). Permutation importance = what actually drives your blunders. Then a leak simulator (see Limitations) with a bootstrap 95% CI on every leak's Elo estimate. |
 | `brilliancy.py` | Two-pass sacrifice finder: cheap board-logic filter, then depth-18 multipv=2 verification on the ~1-2% of moves that offer material. Reports sound-sac hit rate by piece/time-control/phase with Wilson CIs, and flags which comparisons are actually statistically supported. |
 | `drill.py` | Exports your worst 100 positions (by `wp_loss`, weighted toward middlegame and hangs_* blunders) as a multi-game PGN — FEN start, engine's best move as the solution, your actual move as a side variation. Import straight into a Lichess Study. |
-| `app.py` | Streamlit dashboard over `data/moves.parquet`: filters, KPIs, blunder-rate charts, motif breakdown, and a worst-moves table that renders the board (`chess.svg`) on row click. |
+| `app.py` | Streamlit dashboard: filters, KPIs, blunder-rate charts, motif breakdown, board strips, a worst-moves table that renders the board (`chess.svg`) on row click. Reads `data/` locally, `public_data/` when deployed -- see `export_public.py`. |
+| `export_public.py` | `data/` → `public_data/`: the columns the dashboard actually reads (a fraction of the full pipeline output) plus precomputed board positions for the static strips, so the deployed app needs no Stockfish, no PGN cache, no username. |
 | `compare.py` | Friend comparison from API data only — no Stockfish, runs in seconds. |
 
 ## Key definitions

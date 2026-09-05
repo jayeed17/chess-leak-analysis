@@ -1,7 +1,8 @@
 """Theme + components for app.py — Wall Street Journal direction.
 
     from theme import (inject_theme, page_header, kpi_row, split_rate,
-                       SEVERITY, board_svg, board_strip, trend_chart)
+                       SEVERITY, BAR_BASE, board_svg, board_strip,
+                       severity_bar, trend_chart)
 
 Palette is newsprint: warm paper, black ink, hairline rules. Colour is reserved
 for severity and never used decoratively.
@@ -32,6 +33,11 @@ SEVERITY = {
     "good": "#2E5C7A",
     "neutral": "#6E685C",
 }
+
+# neutral bar/line color for charts that aren't themselves a severity ranking --
+# a ranking highlights its one worst bar in SEVERITY["blunder"] instead (see
+# severity_bar()); a plain series (the trend line) just stays this color.
+BAR_BASE = "#5B7C99"
 
 _CSS = f"""
 <style>
@@ -163,6 +169,44 @@ def board_strip(st, figures):
     st.markdown(f'<div class="boards">{html}</div>', unsafe_allow_html=True)
 
 
+def severity_bar(st, series, x_label, y_label, order=None, higher_is_worse=True):
+    """Bar chart via Altair -- st.bar_chart can't colour individual bars.
+
+    Every bar is BAR_BASE except the single worst one, highlighted in
+    SEVERITY["blunder"]. One red bar reads as "this is the problem"; every
+    bar red carries no information at all.
+
+    `higher_is_worse` picks which end is "worst": True for blunder rate /
+    wp_loss (a high number is bad), False for best-move rate / win rate
+    (a LOW number is bad). Get this backwards and the chart highlights your
+    best category as if it were the problem -- pick per chart, not by default.
+
+    `order` sorts the x-axis in that order (Altair handles this directly --
+    no CategoricalIndex workaround needed here, unlike st.bar_chart).
+    """
+    import altair as alt
+
+    data = series.rename("value").rename_axis(x_label).reset_index()
+    worst_i = data["value"].idxmax() if higher_is_worse else data["value"].idxmin()
+    data["is_worst"] = False
+    data.loc[worst_i, "is_worst"] = True
+
+    x_enc = alt.X(f"{x_label}:N", title=None, sort=order if order else "-y")
+    chart = (
+        alt.Chart(data)
+        .mark_bar()
+        .encode(
+            x=x_enc,
+            y=alt.Y("value:Q", title=y_label),
+            color=alt.condition(alt.datum.is_worst,
+                                alt.value(SEVERITY["blunder"]), alt.value(BAR_BASE)),
+            tooltip=[alt.Tooltip(f"{x_label}:N", title=x_label),
+                     alt.Tooltip("value:Q", title=y_label, format=".1f")],
+        )
+    )
+    st.altair_chart(chart, use_container_width=True)
+
+
 def trend_chart(st, df, metric_label, value_col, freq="W", color=None):
     """Weekly trend line over end_time. Returns the series."""
     import pandas as pd
@@ -172,5 +216,5 @@ def trend_chart(st, df, metric_label, value_col, freq="W", color=None):
     if d[value_col].dtype == bool or value_col in ("blunder", "won", "played_best"):
         s = s * 100
     st.line_chart(s.rename(metric_label),
-                  color=color or SEVERITY["blunder"], height=280)
+                  color=color or BAR_BASE, height=280)
     return s

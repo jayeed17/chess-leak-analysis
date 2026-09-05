@@ -19,12 +19,12 @@ import pandas as pd
 import streamlit as st
 
 from dashboard_ext import wilson, rate_table, overlapping, render_brilliancy_tab, board_at, MIN_N
-from theme import inject_theme, page_header, kpi_row, split_rate, SEVERITY, board_svg, board_strip, trend_chart
+from theme import (inject_theme, page_header, kpi_row, split_rate, SEVERITY, BAR_BASE,
+                    board_svg, board_strip, severity_bar, trend_chart)
 
 DATA_PATH = "data/moves.parquet"
 RAW_GLOB = "data/raw/*/*.json"
 BLUNDER_WP = 20  # wp_loss threshold used throughout this dashboard
-BAR_COLOR = SEVERITY["blunder"]  # every st.bar_chart bar -- these are all blunder-rate charts
 LINKEDIN_URL = "https://www.linkedin.com/in/zayeed-bin-kabir/"
 
 st.set_page_config(page_title="chess leak analysis", layout="wide")
@@ -79,21 +79,22 @@ def render_kpis(df):
 
 
 TREND_METRICS = {
-    "Blunder rate": ("is_blunder", SEVERITY["blunder"]),
-    "Mean wp_loss": ("wp_loss", SEVERITY["inaccuracy"]),
-    "Best-move rate": ("played_best", SEVERITY["good"]),
-    "Rating": ("my_rating", SEVERITY["neutral"]),
+    "Blunder rate": "is_blunder",
+    "Mean wp_loss": "wp_loss",
+    "Best-move rate": "played_best",
+    "Rating": "my_rating",
 }
 
 
 def trend_section(df):
     st.subheader("Trend")
     choice = st.selectbox("Metric", list(TREND_METRICS.keys()))
-    value_col, color = TREND_METRICS[choice]
+    value_col = TREND_METRICS[choice]
     if not len(df):
         st.caption("no moves in this filter")
         return
-    trend_chart(st, df, choice, value_col, color=color)
+    # BAR_BASE, not a severity color -- this is a series over time, not a ranking
+    trend_chart(st, df, choice, value_col, color=BAR_BASE)
     if choice == "Rating":
         st.caption("~1,024 games over 8 months, and rating runs flat to negative "
                    "across that span -- more volume hasn't moved it on its own.")
@@ -105,11 +106,15 @@ def trend_section(df):
 
 
 def render_rate_section(df, group_col, title, order=None):
-    """Bar chart + Wilson-CI table for blunder rate across a bucketed column.
+    """Chart + Wilson-CI table for blunder rate across a bucketed column.
 
     Every group carries n and a 95% CI (rate_table), with the same overlap/
     thin warnings the brilliancy tab uses -- a chart bar alone can't show
     that, so the table underneath it is not optional decoration.
+
+    severity_bar highlights only the single worst bar in red -- these are
+    all blunder-rate charts, so higher_is_worse=True (its default) is right
+    for every one of them.
     """
     st.subheader(title)
     if not len(df):
@@ -117,12 +122,8 @@ def render_rate_section(df, group_col, title, order=None):
         return
     g = rate_table(df, group_col, "is_blunder")
     if order:
-        order = [o for o in order if o in g.index]
-        g = g.reindex(order)
-        # st.bar_chart re-sorts a plain string index alphabetically regardless of
-        # row order -- an ordered CategoricalIndex is what actually gets respected
-        g.index = pd.CategoricalIndex(g.index, categories=order, ordered=True)
-    st.bar_chart(g["rate_%"], color=BAR_COLOR)
+        g = g.reindex([o for o in order if o in g.index])
+    severity_bar(st, g["rate_%"], group_col, "Blunder rate (%)", order=order)
     st.dataframe(g, width="stretch")
     if overlapping(g):
         st.caption("⚠️ All intervals overlap — no group separates from any other. "
@@ -174,7 +175,7 @@ def motif_breakdown(df):
     bounds = [wilson(c, n) for c in g["count"]]
     g["ci_low"] = [round(b[0], 1) for b in bounds]
     g["ci_high"] = [round(b[1], 1) for b in bounds]
-    st.bar_chart(g["share_%"], color=BAR_COLOR)
+    severity_bar(st, g["share_%"], "motif", "Share of blunders (%)")
     st.dataframe(g, width="stretch")
     if n < MIN_N:
         st.caption(f"⚠️ Only {n} blunders (n) in this filter — motif shares are indicative only.")

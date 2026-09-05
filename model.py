@@ -58,7 +58,7 @@ def main():
     print("YOUR 8 HIGHEST-RISK RECURRING SITUATIONS")
     buckets = df.groupby(["phase", "time_class",
                           pd.cut(df.clock_left, [0, 30, 120, 1e9],
-                                 labels=["<30s", "30s-2m", "2m+"], observed=False)],
+                                 labels=["<30s", "30s-2m", "2m+"])],
                          observed=True).agg(
         moves=("risk", "size"), pred_risk=("risk", "mean"), actual=("blunder", "mean"))
     buckets = buckets[buckets.moves >= 50].sort_values("actual", ascending=False)

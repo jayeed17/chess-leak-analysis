@@ -99,9 +99,12 @@ def analyse_game(args):
         eng.configure({"Threads": 1, "Hash": 64})
         board = game.board()
         prev_clk = None
+        opp_last_was_capture = False
         for node in game.mainline():
             move = node.move
             if board.turn != me:
+                # check before pushing -- is_capture() reads the pre-move board
+                opp_last_was_capture = board.is_capture(move)
                 board.push(move)
                 continue
 
@@ -150,8 +153,7 @@ def analyse_game(args):
                 "time_spent": spent,
                 "in_check_before": before.is_check(),
                 "was_capture": before.is_capture(move),
-                "opp_last_was_capture": bool(before.move_stack and
-                                             before.is_capture(before.move_stack[-1])),
+                "opp_last_was_capture": opp_last_was_capture,
                 "my_hanging_before": hanging_value(before, me),
                 "my_hanging_after": hanging_value(board, me),
                 "material_diff": sum(

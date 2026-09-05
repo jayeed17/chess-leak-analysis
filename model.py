@@ -6,6 +6,7 @@
 
 Usage: python model.py
 """
+import argparse
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import GroupKFold, cross_val_predict
@@ -32,7 +33,10 @@ def prep(df):
 
 
 def main():
-    df = pd.read_parquet("data/moves.parquet").dropna(subset=["clock_left"])
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--path", default="data/moves.parquet")
+    a = ap.parse_args()
+    df = pd.read_parquet(a.path).dropna(subset=["clock_left"])
     X, y, groups = prep(df), df.blunder.astype(int), df.game_url
 
     cat_mask = [c in CAT for c in X.columns]

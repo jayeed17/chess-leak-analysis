@@ -388,11 +388,22 @@ def sacrifices_tab():
         render_brilliancy_move(sel)
 
 
+CADENCE_NOTE = "updated roughly every two months"
+
+
 def main():
     df_all = load_data()
     df = sidebar_filters(df_all)
-    dateline = (f"{len(df):,} moves / {df.game_url.nunique():,} games in view "
-                f"(of {len(df_all):,} moves / {df_all.game_url.nunique():,} total)")
+    filtered_line = (f"{len(df):,} moves / {df.game_url.nunique():,} games in view "
+                      f"(of {len(df_all):,} moves / {df_all.game_url.nunique():,} total)")
+    # coverage window's end date is the max end_time actually in the data --
+    # not today's date, not a hardcoded string -- so this can't go stale
+    # silently. Loading this in six months should show a six-month-old range,
+    # not something that quietly still looks current.
+    coverage_line = (f"{df_all.game_url.nunique():,} games · "
+                      f"{df_all.end_time.min():%Y-%m-%d} to {df_all.end_time.max():%Y-%m-%d} · "
+                      f"{CADENCE_NOTE}")
+    dateline = f"{filtered_line}<br>{coverage_line}"
     page_header(st, name="Zayeed Bin Kabir", handle="jayeed101",
                 linkedin_url=LINKEDIN_URL, dateline=dateline)
 

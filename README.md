@@ -1,6 +1,11 @@
 # chess-leak-analysis
 
-**Live dashboard: [ADD YOUR STREAMLIT COMMUNITY CLOUD URL HERE]**
+**Live dashboard: https://chess-zayeedbinkabir.streamlit.app/**
+
+1,024 games · 2026-01-01 to 2026-09-05 · updated roughly every two months. The
+dashboard computes this range live from the data on every load (see `main()` in
+`app.py`), so it can't quietly go stale — open the live link above for the
+current number, this line is a snapshot from when this README was last edited.
 
 ![Dashboard screenshot](docs/dashboard_screenshot.png)
 
